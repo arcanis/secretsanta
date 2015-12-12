@@ -50,9 +50,25 @@
                 font-size: 90px;
             }
 
+            .affiliate {
+                display: block;
+                box-sizing: content-box;
+
+                margin-top: 70px;
+
+                border: 10px solid #0CB50C;
+                border-radius: 10px;
+
+                background: rgba(255, 255, 255, .7);
+            }
+
+            .affiliate + .affiliate {
+                margin-top: 40px;
+            }
+
         </style>
 
-        <script>
+        <script>1
 
             var queryString = _.chain( location.search.slice( 1 ).split( /&/g ) )
                 .map( function ( item ) { if ( item ) return item.split( /=/ ).map( function ( str ) { return decodeURIComponent( str ); } ); } )
@@ -73,6 +89,8 @@
                 <h3 class="title">Hi <script>document.write(name)</script>! You've been paired with</h3>
                 <h1 class="pairing"><script>document.write(pairing)</script></h1>
                 <h3 class="title">Good luck!</h3>
+                <iframe class="affiliate" src="http://rcm-eu.amazon-adsystem.com/e/cm?t=secrsant02e-21&o=8&p=48&l=ur1&category=jeuxetjouets&banner=0HS03ACZ89HPK7F4F5G2&f=ifr" width="728" height="90" scrolling="no" border="0" marginwidth="0" frameborder="0"></iframe>
+                <iframe class="affiliate" src="http://rcm-eu.amazon-adsystem.com/e/cm?t=secrsant02e-21&o=8&p=48&l=ur1&category=books&banner=10DQAXJ7D1D2VTXMR682&f=ifr" width="728" height="90" scrolling="no" border="0" marginwidth="0" frameborder="0"></iframe>
             </div>
 
         </div>
