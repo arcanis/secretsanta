@@ -55,7 +55,7 @@
         <script>
 
             var queryString = _.chain( location.search.slice( 1 ).split( /&/g ) )
-                .map( function ( item ) { if ( item ) return item.split( /=/ ); } )
+                .map( function ( item ) { if ( item ) return item.split( /=/ ).map( function ( str ) { return decodeURIComponent( str ); } ); } )
                 .compact().object().value();
 
             var name = queryString.name;
