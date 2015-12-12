@@ -1,0 +1,82 @@
+<!doctype html>
+<html>
+
+    <head>
+
+        <meta charset="utf-8" />
+        <title>Secret Santa Pairing</title>
+
+        <script src="vendors/Lodash-3.10.1.js"></script>
+        <script src="vendors/Cryptojs.aes-3.1.2.js"></script>
+
+        <style>
+
+            * {
+                box-sizing: border-box;
+            }
+
+            html, body, .main {
+                margin: 0;
+
+                width: 100%;
+                height: 100%;
+
+                padding: 0;
+            }
+
+            body {
+                background-image: url(assets/santa.png);
+                background-position: bottom right;
+                background-repeat: no-repeat;
+
+                font-family: 'Comic Sans MS';
+            }
+
+            .main {
+                display: flex;
+            }
+
+            .content {
+                margin: auto;
+
+                text-align: center;
+            }
+
+            .title {
+                font-size: 30px;
+            }
+
+            .pairing {
+                font-size: 90px;
+            }
+
+        </style>
+
+        <script>
+
+            var queryString = _.chain( location.search.slice( 1 ).split( /&/g ) )
+                .map( function ( item ) { if ( item ) return item.split( /=/ ); } )
+                .compact().object().value();
+
+            var name = queryString.name;
+            var pairing = CryptoJS.AES.decrypt( queryString.pairing, queryString.key ).toString(CryptoJS.enc.Utf8);
+
+        </script>
+
+    </head>
+
+    <body>
+
+        <div class="main">
+
+            <div class="content">
+                <h3 class="title">Hi <script>document.write(name)</script>! You've been paired with</h3>
+                <h1 class="pairing"><script>document.write(pairing)</script></h1>
+                <h3 class="title">Good luck!</h3>
+            </div>
+
+        </div>
+
+    </body>
+
+</html>

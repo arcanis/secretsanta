@@ -1,0 +1,351 @@
+<!doctype html>
+<html>
+
+    <head>
+
+        <meta charset="utf-8" />
+        <title>Secret Santa Generator</title>
+
+        <script src="vendors/Lodash-3.10.1.js"></script>
+        <script src="vendors/Cryptojs.aes-3.1.2.js"></script>
+
+        <script src="./SecretSanta.js"></script>
+
+        <style>
+
+            * {
+                box-sizing: border-box;
+            }
+
+            html, body, .main {
+                margin: 0;
+
+                width: 100%;
+                height: 100%;
+
+                padding: 0;
+            }
+
+            body {
+                background-image: url(assets/santa.png);
+                background-position: bottom right;
+                background-repeat: no-repeat;
+
+                font-family: 'Comic Sans MS';
+            }
+
+            .main {
+                display: flex;
+            }
+
+            .part {
+                display: flex;
+                flex-direction: column;
+
+                padding: 20px;
+
+                flex: 1;
+            }
+
+            .instructions {
+                margin: auto 10%;
+            }
+
+            .instructions a {
+                text-decoration: none;
+
+                color: #0CB50C;
+            }
+
+            .input {
+                display: block;
+                align-self: stretch;
+
+                width: 100%;
+                flex: auto;
+
+                border: 10px solid #0CB50C;
+                border-radius: 10px;
+
+                padding: 15px;
+
+                background-color: rgba(255, 255, 255, .7);
+                outline: none;
+            }
+
+            .generate {
+                display: block;
+
+                margin-top: 20px;
+
+                flex: none;
+                height: 100px;
+
+                border: 10px solid #0CB50C;
+                border-radius: 10px;
+
+                font-family: inherit;
+                font-size: 40px;
+
+                background-color: #EA1212;
+                color: #FFFFFF;
+            }
+
+            .generate:focus {
+                border-color: #E6E020;
+
+                outline: none;
+            }
+
+            .result {
+                margin-top: 20px;
+
+                flex: none;
+
+                border: 10px solid #E6E020;
+                border-radius: 10px;
+
+                padding: 15px;
+
+                background: #FFFFFF;
+            }
+
+            .result a {
+                color: blue;
+            }
+
+            .result.none {
+                display: none;
+            }
+
+            .result.error {
+                border-color: #EA1212;
+
+                color: #EA1212;
+            }
+
+            .result-table {
+                table-layout: fixed;
+
+                width: 100%;
+            }
+
+            .result-name {
+                width: 20%;
+
+                padding-right: 5px 8px;
+            }
+
+            .result-link {
+                width: 100%;
+                overflow: hidden;
+
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+        </style>
+
+    </head>
+
+    <body>
+
+        <div class="main">
+
+            <div class="part">
+                <div class="instructions">
+                    <h1><img src="assets/mistletoe.png" style="vertical-align: middle" /> Secret Santa Generator</h1>
+                    <p>No signup, no email, no bullshit. Just a straightforward open-source tool to help you generate your secret santa pairings. Static page only.</p>
+                    <p>The DSL used to set the pairing rules is dead simple: in the most basic use case (no special rule), you just have to enter the name of your guests, one line at a time. Press "generate" and voilà, you will get a set of links that you will just have to give to each one of them (by mail, chat, whatever float your boat). Once they access the link, their pairing will be revealed (to them and only them).</p>
+                    <p>Should you have more complex needs (for example if you want to prevent a couple from being paired together, or want to prevent someone to be paired with someone else they don't know), just append <code>!&lt;name&gt;</code> after a guest name, and he will never be paired with <code>&lt;name&gt;</code> (check on the right for an example).</p>
+                    <h2>Where does this tool come from?</h2>
+                    <p>I just wanted to make a Secret Santa over Facebook without giving up my guests email addresses to do so (so nothing that requires a backend). I also wanted to ignore who was paired with me, so I had to find a way to obfuscate it. And since I'm a developer, well, I just thought "Let's AES it, for fun and profits!". Classic.</p>
+                    <p>If you want to tip me, feel free to send me anything on the following Bitcoin address! I'll probably use it on some 3DS game (Fire Emblem, maybe?) :) Anyway, merry christmas!</p>
+                    <p><img src="assets/bitcoin.ico" style="vertical-align: middle" /> <a href="bitcoin:1HLgRVCGcXabWhMfdLazFVUWiH2W1kCDQK"><code>1HLgRVCGcXabWhMfdLazFVUWiH2W1kCDQK</code></a></p>
+                </div>
+            </div>
+
+            <form id="form" class="part">
+                <textarea id="input" class="input" autofocus></textarea>
+                <button type="submit" class="generate">Generate your pairings</button>
+                <div id="result" class="result none"></div>
+            </form>
+
+        </div>
+
+        <script id="input-placeholder" type="text/placeholder">
+            # You can add a user by adding a line
+            Santa
+
+            # You can prevent someone from being paired with someone else
+            Maël !Aurélie
+            Aurélie !Maël
+
+            ...
+        </script>
+
+    </body>
+
+    <script>
+
+      function persist() {
+
+          if ( ! window.localStorage )
+              return ;
+
+          var content = document.getElementById( 'input' ).value;
+
+          window.localStorage.setItem( 'input', content );
+
+      }
+
+      function restore() {
+
+          if ( ! window.localStorage )
+              return ;
+
+          var content = window.localStorage.getItem( 'input' ) || '';
+
+          document.getElementById( 'input' ).value = content;
+
+      }
+
+      function reset() {
+
+          var result = document.getElementById( 'result' );
+
+          result.classList.add( 'none' );
+          result.classList.remove( 'error' );
+
+      }
+
+      function error(text) {
+
+          var result = document.getElementById( 'result' );
+
+          result.classList.remove( 'none' );
+          result.classList.add( 'error' );
+
+          result.innerText = text;
+
+      }
+
+      function success( pairings ) {
+
+          var result = document.getElementById( 'result' );
+
+          result.classList.remove( 'none' );
+          result.classList.remove( 'error' );
+
+          result.innerHTML = '';
+
+          var table = document.createElement( 'table' );
+          table.className = 'result-table';
+          result.appendChild( table );
+
+          var names = Object.keys( pairings ).sort();
+
+          for ( var t = 0, T = names.length; t < T; ++ t ) {
+
+              var name = names[ t ];
+
+              var tr = document.createElement( 'tr' );
+              tr.className = 'result-row';
+              table.appendChild( tr );
+
+              var tdName = document.createElement( 'td' );
+              tdName.className = 'result-name';
+              tr.appendChild( tdName );
+
+              var tdLink = document.createElement( 'td' );
+              tdLink.className = 'result-link';
+              tr.appendChild( tdLink );
+
+              var link = document.createElement( 'a' );
+              tdLink.appendChild( link );
+
+              var key = String( _.random( 0x0000, 0xFFFF ) );
+              var encryptedPairing = CryptoJS.AES.encrypt( pairings[ name ], key );
+
+              var pairingPath = window.location.pathname.replace( /[^/]+$/, '' ) + 'pairing.html';
+              var pairingQueryString = '?name=' + encodeURIComponent( name ) + '&key=' + key + '&pairing=' + encryptedPairing;
+
+              tdName.innerText = name;
+              link.href = window.location.protocol + '//' + window.location.host + pairingPath + pairingQueryString;
+              link.innerText = link.href;
+
+          }
+
+      }
+
+      function generate( e ) {
+
+          e.preventDefault();
+
+          var content = document.getElementById( 'input' ).value;
+
+          // Convert carriage returns into line feeds
+          content = content.replace( /(\r\n|\r)/g, '\n' );
+
+          // Merge adjacent blank characters into a single space
+          content = content.replace( /[ \t]+/g, ' ' );
+
+          // Trim lines
+          content = content.replace( /^ | $/gm, '' );
+
+          // Strip comments
+          content = content.replace( /^#.*$/gm, '' );
+
+          // Strip empty lines
+          content = content.replace( /\n+/g, '\n' );
+
+          // Remove trailing newline
+          content = content.replace( /\n$/, '' );
+
+          var lines = content.split( /\n/g );
+
+          if ( lines.length === 0 || lines.length === 1 && lines[ 0 ].length === 0 )
+              return reset();
+
+          var santa = new SecretSanta();
+
+          for ( var t = 0, T = lines.length; t < T; ++ t ) {
+
+              var match = lines[ t ].match( /^([^ ]+)(?: ((?:![^ ]+)(?: ![^ ]+)*))?$/ );
+
+              if ( ! match )
+                  return error( 'Syntax error: "' + lines[ t ] + '" isn\'t a valid line' );
+
+              var name = match[ 1 ];
+              var exclusions = match[ 2 ] ? match[ 2 ].replace( /!/g, '' ).split( / /g ) : [];
+
+              var person = santa.add( name );
+
+              for ( var u = 0, U = exclusions.length; u < U; ++ u ) {
+                  person.blacklist( exclusions[ u ] );
+              }
+
+          }
+
+          try {
+              return success( santa.generate() );
+          } catch ( err ) {
+            console.error(err.stack)
+              return error( err.message );
+          }
+
+      }
+
+    </script>
+
+    <script>
+
+        document.getElementById( 'input' ).placeholder = document.getElementById( 'input-placeholder' ).innerHTML.trim().replace( /^[ \t]+/gm, '' );
+        document.getElementById( 'input' ).addEventListener( 'change', persist );
+        document.getElementById( 'form' ).addEventListener( 'submit', generate );
+
+        restore();
+
+    </script>
+
+</html>
