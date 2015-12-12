@@ -271,6 +271,9 @@
               var pairingQueryString = '?name=' + encodeURIComponent( name ) + '&key=' + key + '&pairing=' + encryptedPairing;
 
               tdName.innerText = name;
+
+              link.addEventListener( 'click', protect );
+              link.setAttribute( 'data-name', name );
               link.href = window.location.protocol + '//' + window.location.host + pairingPath + pairingQueryString;
               link.innerText = link.href;
 
@@ -332,6 +335,16 @@
           } catch ( err ) {
             console.error(err.stack)
               return error( err.message );
+          }
+
+      }
+
+      function protect( e ) {
+
+          var name = e.currentTarget.getAttribute( 'data-name' );
+
+          if ( ! confirm( 'If you click this link, you will be revealed ' + name + '\'s pairing! Are you sure you want to do this? Only do this if you\'re actually ' + name + '.\n\nUse right-click to copy the link target instead.' ) ) {
+              e.preventDefault();
           }
 
       }
