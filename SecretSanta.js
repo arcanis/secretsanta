@@ -38,7 +38,7 @@ SecretSanta.prototype.generate = function () {
 
     this.names.forEach( function ( name ) {
 
-        var candidates = _.difference( this.names, name );
+        var candidates = _.difference( this.names, [ name ] );
 
         if ( Object.prototype.hasOwnProperty.call( this.blacklists, name ) )
             candidates = _.difference( candidates, this.blacklists[ name ] );
