@@ -62,6 +62,9 @@ SecretSanta.prototype.generate = function () {
 
         var name = findNextGifter();
 
+        if ( candidatePairings[ name ].length === 0 )
+            throw new Error('We haven\'t been able to find a match for ' + name + '! Press "Generate" to try again and, if it still doesn\'t work, try removing some exclusions from your rules. Sorry for the inconvenience!');
+
         var pairing = _.sample( candidatePairings[ name ] );
         delete candidatePairings[ name ];
 
