@@ -86,9 +86,15 @@
         <div class="main">
 
             <div class="content">
-                <h3 class="title">Hi <script>document.write(name)</script>! You've been paired with</h3>
-                <h1 class="pairing"><script>document.write(pairing)</script></h1>
+                
+                <h3 class="title">Hi <span id="name"></span>! You've been paired with</h3>
+                <script>document.getElementById('name').innerText = name</script>
+
+                <h1 class="pairing"><span id="pairing"></span></h1>
+                <script>document.getElementById('pairing').innerText = pairing</script>
+                
                 <h3 class="title">Good luck!</h3>
+                
                 <!--
                 <iframe class="affiliate" src="http://rcm-eu.amazon-adsystem.com/e/cm?t=secrsant02e-21&o=8&p=48&l=ur1&category=jeuxetjouets&banner=0HS03ACZ89HPK7F4F5G2&f=ifr" width="728" height="90" scrolling="no" border="0" marginwidth="0" frameborder="0"></iframe>
                 <iframe class="affiliate" src="http://rcm-eu.amazon-adsystem.com/e/cm?t=secrsant02e-21&o=8&p=48&l=ur1&category=books&banner=10DQAXJ7D1D2VTXMR682&f=ifr" width="728" height="90" scrolling="no" border="0" marginwidth="0" frameborder="0"></iframe>
