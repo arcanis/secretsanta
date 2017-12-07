@@ -268,7 +268,7 @@
               var encryptedPairing = CryptoJS.AES.encrypt( pairings[ name ], key );
 
               var pairingPath = window.location.pathname.replace( /[^/]+$/, '' ) + 'pairing.html';
-              var pairingQueryString = '?name=' + encodeURIComponent( name ) + '&key=' + key + '&pairing=' + encryptedPairing;
+              var pairingQueryString = '?name=' + encodeURIComponent( name ) + '&key=' + encodeURIComponent( key ) + '&pairing=' + encodeURIComponent( encryptedPairing );
 
               tdName.innerText = name;
 
