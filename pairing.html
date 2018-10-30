@@ -25,19 +25,71 @@
             }
 
             body {
-                background-image: url(assets/santa.png);
-                background-position: bottom right;
-                background-repeat: no-repeat;
+                background: url(./assets/snow.png), url(./assets/santa.png), url(./assets/snow.png), radial-gradient(#FB3B3B, #EF3D3D);
+                background-repeat: repeat, no-repeat, repeat, no-repeat;
+
+                animation-name: snow;
+                animation-duration: 5s;
+                animation-iteration-count: infinite;
+                animation-timing-function: linear;
 
                 font-family: 'Comic Sans MS';
+            }
+
+            @keyframes snow {
+                from { background-position: 130px 40px, bottom right, 0 0, 0 0; }
+                to { background-position: 130px 640px, bottom right, 0 300px, 0 0; }
+            }
+
+            .spirit-of-christmas {
+                display: block;
+
+                position: absolute;
+                bottom: 0;
+                left: 0;
+
+                padding: 20px;
+
+                font-size: 10px;
+                text-decoration: none;
+
+                color: #FFFFFF;
             }
 
             .main {
                 display: flex;
             }
 
-            .content {
+            .background {
+                position: absolute;
+
+                left: 0;
+                bottom: 0;
+            }
+
+            .wrapper {
                 margin: auto;
+                padding: 20px;
+
+                background: repeating-linear-gradient(
+                    45deg,
+                    #5CC48A,
+                    #5CC48A 30px,
+                    #FFFFFF 30px,
+                    #FFFFFF 60px,
+                    #EF3D3D 60px,
+                    #EF3D3D 90px,
+                    #FFFFFF 90px,
+                    #FFFFFF 120px
+                );
+
+                box-shadow: 3px 3px 10px rgba(0, 0, 0, .5);
+            }
+
+            .content {
+                padding: 40px;
+
+                background: #ffffff;
 
                 text-align: center;
             }
@@ -54,10 +106,9 @@
                 display: block;
                 box-sizing: content-box;
 
-                margin-top: 70px;
+                margin-top: 40px;
 
-                border: 10px solid #0CB50C;
-                border-radius: 10px;
+                border: none;
 
                 background: rgba(255, 255, 255, .7);
             }
@@ -68,7 +119,7 @@
 
         </style>
 
-        <script>1
+        <script>
 
             var queryString = _.chain( location.search.slice( 1 ).split( /&/g ) )
                 .map( function ( item ) { if ( item ) return item.split( /=/ ).map( function ( str ) { return decodeURIComponent( str ); } ); } )
@@ -85,21 +136,29 @@
 
         <div class="main">
 
-            <div class="content">
-                
-                <h3 class="title">Hi <span id="name"></span>! You've been paired with</h3>
-                <script>document.getElementById('name').innerText = name</script>
+            <div class="wrapper">
+                <div class="content">
 
-                <h1 class="pairing"><span id="pairing"></span></h1>
-                <script>document.getElementById('pairing').innerText = pairing</script>
-                
-                <h3 class="title">Good luck!</h3>
-                
-                <!--
-                <iframe class="affiliate" src="http://rcm-eu.amazon-adsystem.com/e/cm?t=secrsant02e-21&o=8&p=48&l=ur1&category=jeuxetjouets&banner=0HS03ACZ89HPK7F4F5G2&f=ifr" width="728" height="90" scrolling="no" border="0" marginwidth="0" frameborder="0"></iframe>
-                <iframe class="affiliate" src="http://rcm-eu.amazon-adsystem.com/e/cm?t=secrsant02e-21&o=8&p=48&l=ur1&category=books&banner=10DQAXJ7D1D2VTXMR682&f=ifr" width="728" height="90" scrolling="no" border="0" marginwidth="0" frameborder="0"></iframe>
-                -->
+                    <div class="title">Hi <span id="name"></span>! You've been paired with</div>
+                    <script>document.getElementById('name').innerText = name</script>
+
+                    <div class="pairing"><span id="pairing"></span></div>
+                    <script>document.getElementById('pairing').innerText = pairing</script>
+
+                    <div class="title">Good luck!</div>
+
+                    <script>
+                        if (queryString.extra) {
+                            document.write('<iframe class="affiliate" src="http://rcm-eu.amazon-adsystem.com/e/cm?t=secrsant02e-21&o=8&p=48&l=ur1&category=books&banner=10DQAXJ7D1D2VTXMR682&f=ifr" width="728" height="90" scrolling="no" border="0" marginwidth="0" frameborder="0"></iframe>');
+                        }
+                    </script>
+
+                </div>
             </div>
+
+            <a href="http://arcanis.github.io/secretsanta/" class="spirit-of-christmas">
+                Want to start your own Secret Santa with your friends? Click here to get started!
+            </a>
 
         </div>
 

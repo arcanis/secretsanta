@@ -2,6 +2,7 @@ var SecretSanta = function () {
 
     this.names = [];
 
+    this.enforced = Object.create( null );
     this.blacklists = Object.create( null );
 };
 
@@ -14,6 +15,14 @@ SecretSanta.prototype.add = function ( name ) {
     this.names.push( name );
 
     var subapi = { };
+
+    subapi.enforce = function ( other ) {
+
+        this.enforced[ name ] = other;
+
+        return subapi;
+
+    }.bind( this );
 
     subapi.blacklist = function ( other ) {
 
@@ -38,12 +47,33 @@ SecretSanta.prototype.generate = function () {
 
     this.names.forEach( function ( name ) {
 
-        var candidates = _.difference( this.names, [ name ] );
+        if ( Object.prototype.hasOwnProperty.call( this.enforced, name ) ) {
 
-        if ( Object.prototype.hasOwnProperty.call( this.blacklists, name ) )
-            candidates = _.difference( candidates, this.blacklists[ name ] );
+            var enforced = this.enforced[ name ];
 
-        candidatePairings[ name ] = candidates;
+            if ( this.names.indexOf( enforced ) === -1 )
+                throw new Error( name + ' is paired with ' + enforced + ', which hasn\'t been declared as a possible pairing' );
+
+            Object.keys( pairings ).forEach( function ( name ) {
+
+                if ( pairings[ name ] === enforced ) {
+                    throw new Error( 'Per your rules, multiple persons are paired with ' + enforced );
+                }
+
+            } );
+
+            pairings[ name ] = this.enforced[ name ];
+
+        } else {
+
+            var candidates = _.difference( this.names, [ name ] );
+
+            if ( Object.prototype.hasOwnProperty.call( this.blacklists, name ) )
+                candidates = _.difference( candidates, this.blacklists[ name ] );
+
+            candidatePairings[ name ] = candidates;
+
+        }
 
     }, this );
 

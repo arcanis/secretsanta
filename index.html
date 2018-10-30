@@ -152,16 +152,13 @@
 
         <div class="main">
 
-            <div class="part">
+            <div class="part" style="overflow-y: auto">
                 <div class="instructions">
                     <h1><img src="assets/mistletoe.png" style="vertical-align: middle" /> Secret Santa Generator</h1>
-                    <p>No signup, no email, no bullshit. Just a straightforward <a href="https://github.com/arcanis/secretsanta">open-source</a> tool to help you generate your secret santa pairings. Static page only.</p>
-                    <p>The DSL that is used to set the pairing rules is dead simple: in the most common use case (no special rule, pair each guest to another), you just have to enter the name of your guests, one line at a time. Once done, press "generate" and voilà, you will get a set of links that you will just have to give to each one of them (by mail, chat, whatever float your boat). Once they access the link, their pairing will be revealed (to them and only them).</p>
-                    <p>Should you have more complex needs (for example if you want to prevent a couple from being paired together, or want to prevent someone to be paired with someone else they don't know), just append <code>!&lt;name&gt;</code> after a guest name, and he will never be paired with <code>&lt;name&gt;</code> (check on the right for an example).</p>
+                    <p>No signup, no email, no bullshit. Just a straightforward <a href="https://github.com/arcanis/secretsanta">open-source</a> tool to help you generate your secret santa pairings. One static page, and that's it.</p>
+                    <p>In the most common case (no exclusion rules, pair each guest with another at random), enter the name of your guests one line at a time. Once done, press "generate" and you're all set: send the generated links to your guests (by mail, chat, whatever floats your boat) and their pairing will be revealed to them (and only them) once they open the link.</p>
                     <h2>Where does this tool come from?</h2>
-                    <p>I just wanted to make a Secret Santa over Facebook without giving up my guests email addresses to do so (so nothing that requires a backend). I also wanted to ignore who was paired with me, so I had to find a way to obfuscate it. And since I'm a developer, well, I just thought "Let's AES it, for fun and profits!". Classic.</p>
-<!--                <p>If you want to tip me, feel free to send me anything on the following Bitcoin address! I'll probably use it on some 3DS game (Fire Emblem, maybe?) :) Anyway, merry christmas!</p>
-                    <p><img src="assets/bitcoin.ico" style="vertical-align: middle" /> <a href="bitcoin:1HLgRVCGcXabWhMfdLazFVUWiH2W1kCDQK"><code>1HLgRVCGcXabWhMfdLazFVUWiH2W1kCDQK</code></a></p>-->
+                    <p>I wanted to make a Secret Santa over Facebook without having to reveal to anyone my guests email addresses (so nothing that would require a backend). I also wanted not to know who was paired with me, so I had to find a way to somehow obfuscate the information. And being a developer, well, my first thought was "Let's AES it, for fun and profits!". Classic.</p>
                 </div>
             </div>
 
@@ -181,6 +178,13 @@
             Maël !Aurélie
             Aurélie !Maël
 
+            # You can also exclude someone from being paired with multiple people
+            # Careful: too many exclusion rules can make your secret santa less interesting!
+            Rudolph !Maël !Santa
+
+            # You can also cheat a bit and force someone to be paired with another
+            Aurélie =Santa
+
             ...
         </script>
 
@@ -188,13 +192,23 @@
 
     <script>
 
+      function isAmazonEnabled() {
+
+          const checkBox = document.getElementById('amazon');
+
+          return checkBox ? checkBox.checked : false;
+
+      }
+
       function persist() {
 
           if ( ! window.localStorage )
               return ;
 
+          var amazon = isAmazonEnabled();
           var content = document.getElementById( 'input' ).value;
 
+          window.localStorage.setItem( 'amazon', amazon );
           window.localStorage.setItem( 'input', content );
 
       }
@@ -204,7 +218,17 @@
           if ( ! window.localStorage )
               return ;
 
-          var content = window.localStorage.getItem( 'input' ) || '';
+          var amazon = window.localStorage.getItem( 'amazon' );
+          var content = window.localStorage.getItem( 'input' );
+
+          if (typeof amazon === 'undefined')
+              amazon = true;
+
+          if (typeof content === 'undefined')
+              content = '';
+
+          if ( document.getElementById( 'amazon' ) )
+              document.getElementById( 'amazon' ).checked = amazon;
 
           document.getElementById( 'input' ).value = content;
 
@@ -270,11 +294,34 @@
               var pairingPath = window.location.pathname.replace( /[^/]+$/, '' ) + 'pairing.html';
               var pairingQueryString = '?name=' + encodeURIComponent( name ) + '&key=' + encodeURIComponent( key ) + '&pairing=' + encodeURIComponent( encryptedPairing );
 
+              if ( isAmazonEnabled() )
+                  pairingQueryString += '&extra=1';
+
               tdName.innerText = name;
 
               link.addEventListener( 'click', protect );
               link.setAttribute( 'data-name', name );
               link.href = window.location.protocol + '//' + window.location.host + pairingPath + pairingQueryString;
+              link.innerText = link.href;
+
+          }
+
+      }
+
+      function updateAmazon() {
+
+          var result = document.getElementById( 'result' );
+          var links = result.getElementsByTagName( 'a' );
+
+          for ( var t = 0; t < links.length; ++t ) {
+
+              var link = links[t];
+
+              if ( isAmazonEnabled() )
+                  link.href += '&extra=1';
+              else
+                  link.href = link.href.replace( /&extra=[01]/, '' );
+
               link.innerText = link.href;
 
           }
@@ -302,10 +349,12 @@
           // Strip empty lines
           content = content.replace( /\n+/g, '\n' );
 
-          // Remove trailing newline
-          content = content.replace( /\n$/, '' );
+          // Remove leading/trailing newlines
+          content = content.replace( /^\n|\n$/g, '' );
 
           var lines = content.split( /\n/g );
+
+          console.log(lines);
 
           if ( lines.length === 0 || lines.length === 1 && lines[ 0 ].length === 0 )
               return reset();
@@ -314,18 +363,31 @@
 
           for ( var t = 0, T = lines.length; t < T; ++ t ) {
 
-              var match = lines[ t ].match( /^([^ ]+)(?: ((?:![^ ]+)(?: ![^ ]+)*))?$/ );
+              var match = lines[ t ].match( /^([^ ]+)((?: [!=][^ ]+)*)$/ );
 
               if ( ! match )
-                  return error( 'Syntax error: "' + lines[ t ] + '" isn\'t a valid line' );
+                  return error( 'Syntax error: "' + lines[ t ] + '" isn\'t valid' );
 
               var name = match[ 1 ];
-              var exclusions = match[ 2 ] ? match[ 2 ].replace( /!/g, '' ).split( / /g ) : [];
+              var rules = match[ 2 ] ? match[ 2 ].match(/[^ ]+/) : null;
 
               var person = santa.add( name );
 
-              for ( var u = 0, U = exclusions.length; u < U; ++ u ) {
-                  person.blacklist( exclusions[ u ] );
+              if (rules) {
+
+                  for ( var u = 0, U = rules.length; u < U; ++ u ) {
+
+                      var fnName = {
+
+                          '=': 'enforce',
+                          '!': 'blacklist'
+
+                      }[ rules[ u ].charAt( 0 ) ];
+
+                      person[ fnName ]( rules[ u ].slice( 1 ) );
+
+                  }
+
               }
 
           }
@@ -355,6 +417,12 @@
 
         document.getElementById( 'input' ).placeholder = document.getElementById( 'input-placeholder' ).innerHTML.trim().replace( /^[ \t]+/gm, '' );
         document.getElementById( 'input' ).addEventListener( 'change', persist );
+
+        if ( document.getElementById( 'amazon' ) ) {
+            document.getElementById( 'amazon' ).addEventListener( 'change', updateAmazon );
+            document.getElementById( 'amazon' ).addEventListener( 'change', persist );
+        }
+
         document.getElementById( 'form' ).addEventListener( 'submit', generate );
 
         restore();
