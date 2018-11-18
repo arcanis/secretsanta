@@ -274,8 +274,8 @@
 
           for ( var t = 0, T = names.length; t < T; ++ t ) {
 
-              var displayName = names[ t ];
-              var name = names[ t ].replace( /\([^)]+\)/g, ' ' ).replace( / +/g, ' ' ).trim();
+              var name = names[ t ];
+              var prettyName = names[ t ].replace( /\([^)]+\)/g, ' ' ).replace( / +/g, ' ' ).trim();
 
               var tr = document.createElement( 'tr' );
               tr.className = 'result-row';
@@ -296,15 +296,15 @@
               var encryptedPairing = CryptoJS.AES.encrypt( pairings[ name ], key );
 
               var pairingPath = window.location.pathname.replace( /[^/]+$/, '' ) + 'pairing.html';
-              var pairingQueryString = '?name=' + encodeURIComponent( name ) + '&key=' + encodeURIComponent( key ) + '&pairing=' + encodeURIComponent( encryptedPairing );
+              var pairingQueryString = '?name=' + encodeURIComponent( prettyName ) + '&key=' + encodeURIComponent( key ) + '&pairing=' + encodeURIComponent( encryptedPairing );
 
               if ( isAmazonEnabled() )
                   pairingQueryString += '&extra=1';
 
-              tdName.innerText = displayName;
+              tdName.innerText = name;
 
               link.addEventListener( 'click', protect );
-              link.setAttribute( 'data-name', displayName );
+              link.setAttribute( 'data-name', name );
               link.href = window.location.protocol + '//' + window.location.host + pairingPath + pairingQueryString;
               link.innerText = link.href;
 
