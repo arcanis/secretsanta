@@ -306,6 +306,7 @@
               link.addEventListener( 'click', protect );
               link.setAttribute( 'data-name', name );
               link.href = window.location.protocol + '//' + window.location.host + pairingPath + pairingQueryString;
+              link.target = '_blank';
               link.innerText = link.href;
 
           }
