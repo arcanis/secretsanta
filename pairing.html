@@ -98,8 +98,14 @@
                 font-size: 30px;
             }
 
-            .pairing {
+            #pairing-name {
                 font-size: 90px;
+            }
+
+            #pairing-details {
+                margin-bottom: 20px;
+
+                font-size: 20px;
             }
 
             .affiliate {
@@ -126,7 +132,9 @@
                 .compact().object().value();
 
             var name = queryString.name;
+
             var pairing = CryptoJS.AES.decrypt( queryString.pairing, queryString.key ).toString(CryptoJS.enc.Utf8);
+            var pairingDefinition = pairing.match( /^([^(]+)(?: (\([^)]+\)))?$/ );
 
         </script>
 
@@ -142,8 +150,19 @@
                     <div class="title">Hi <span id="name"></span>! You've been paired with</div>
                     <script>document.getElementById('name').innerText = name</script>
 
-                    <div class="pairing"><span id="pairing"></span></div>
-                    <script>document.getElementById('pairing').innerText = pairing</script>
+                    <div class="pairing">
+                        <div id="pairing-name"></div>
+                        <div id="pairing-details"></div>
+                        <script>
+                            document.getElementById('pairing-name').innerText = pairingDefinition[1];
+
+                            if (pairingDefinition[2]) {
+                                document.getElementById('pairing-details').innerText = pairingDefinition[2];
+                            } else {
+                                document.getElementById('pairing-details').style.display = 'none';
+                            }
+                        </script>
+                    </div>
 
                     <div class="title">Good luck!</div>
 

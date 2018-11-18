@@ -131,9 +131,9 @@
             }
 
             .result-name {
-                width: 20%;
+                width: 30%;
 
-                padding-right: 5px 8px;
+                padding: 5px 8px;
             }
 
             .result-link {
@@ -174,16 +174,19 @@
             # You can add a user by adding a line
             Santa
 
+            # You can add some details if you want to, using parentheses after the name
+            Nicholas (the elf)
+
             # You can prevent someone from being paired with someone else
             Maël !Aurélie
             Aurélie !Maël
 
             # You can also exclude someone from being paired with multiple people
             # Careful: too many exclusion rules can make your secret santa less interesting!
-            Rudolph !Maël !Santa
+            Rudolph !Santa !Nicholas (the elf)
 
             # You can also cheat a bit and force someone to be paired with another
-            Aurélie =Santa
+            Nicholas (the saint) =Nicholas (the elf)
 
             ...
         </script>
@@ -271,7 +274,8 @@
 
           for ( var t = 0, T = names.length; t < T; ++ t ) {
 
-              var name = names[ t ];
+              var displayName = names[ t ];
+              var name = names[ t ].replace( /\([^)]+\)/g, ' ' ).replace( / +/g, ' ' ).trim();
 
               var tr = document.createElement( 'tr' );
               tr.className = 'result-row';
@@ -297,10 +301,10 @@
               if ( isAmazonEnabled() )
                   pairingQueryString += '&extra=1';
 
-              tdName.innerText = name;
+              tdName.innerText = displayName;
 
               link.addEventListener( 'click', protect );
-              link.setAttribute( 'data-name', name );
+              link.setAttribute( 'data-name', displayName );
               link.href = window.location.protocol + '//' + window.location.host + pairingPath + pairingQueryString;
               link.innerText = link.href;
 
@@ -354,8 +358,6 @@
 
           var lines = content.split( /\n/g );
 
-          console.log(lines);
-
           if ( lines.length === 0 || lines.length === 1 && lines[ 0 ].length === 0 )
               return reset();
 
@@ -363,13 +365,13 @@
 
           for ( var t = 0, T = lines.length; t < T; ++ t ) {
 
-              var match = lines[ t ].match( /^([^ ]+)((?: [!=][^ ]+)*)$/ );
+              var match = lines[ t ].match( /^((?:(?![!=]).)+)((?: [!=](?:(?! [!=]).)+)*)$/ );
 
               if ( ! match )
                   return error( 'Syntax error: "' + lines[ t ] + '" isn\'t valid' );
 
               var name = match[ 1 ];
-              var rules = match[ 2 ] ? match[ 2 ].match(/[^ ]+/) : null;
+              var rules = match[ 2 ] ? match[ 2 ].match(/[!=][^!=]+/) : null;
 
               var person = santa.add( name );
 
@@ -384,7 +386,7 @@
 
                       }[ rules[ u ].charAt( 0 ) ];
 
-                      person[ fnName ]( rules[ u ].slice( 1 ) );
+                      person[ fnName ]( rules[ u ].slice( 1 ).trim() );
 
                   }
 
