@@ -372,7 +372,7 @@
                   return error( 'Syntax error: "' + lines[ t ] + '" isn\'t valid' );
 
               var name = match[ 1 ];
-              var rules = match[ 2 ] ? match[ 2 ].match(/[!=][^!=]+/) : null;
+              var rules = match[ 2 ] ? match[ 2 ].match(/[!=][^!=]+/g) : null;
 
               var person = santa.add( name );
 

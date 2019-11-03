@@ -62,7 +62,7 @@ SecretSanta.prototype.generate = function () {
 
             } );
 
-            pairings[ name ] = this.enforced[ name ];
+            candidatePairings[ name ] = [ this.enforced[ name ] ];
 
         } else {
 
