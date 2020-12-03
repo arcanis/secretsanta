@@ -68,8 +68,16 @@ SecretSanta.prototype.generate = function () {
 
             var candidates = _.difference( this.names, [ name ] );
 
-            if ( Object.prototype.hasOwnProperty.call( this.blacklists, name ) )
-                candidates = _.difference( candidates, this.blacklists[ name ] );
+            if ( Object.prototype.hasOwnProperty.call( this.blacklists, name )) {   
+                for (var blacklist_ind = 0; blacklist_ind < this.blacklists[name].length; blacklist_ind++) {
+                    blacklisted_person  = this.blacklists[name][blacklist_ind]
+                    for (var can_id = 0; can_id < candidates.length; can_id++) {
+                        if (candidates[can_id].split(/\(/)[0].trim() == blacklisted_person) {
+                            candidates.splice(can_id, 1)
+                        }
+                    }
+                }
+            }
 
             candidatePairings[ name ] = candidates;
 
