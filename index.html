@@ -284,7 +284,7 @@
 
               link.addEventListener( 'click', protect );
               link.setAttribute( 'data-name', name );
-              link.href = window.location.protocol + '//' + window.location.host + pairingPath + pairingQueryString;
+              link.href = window.location.protocol + '//' + window.location.host + pairingPath + pairingHashFragment;
               link.target = '_blank';
               link.innerText = link.href;
 
