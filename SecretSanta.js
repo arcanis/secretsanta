@@ -4,6 +4,7 @@ var SecretSanta = function () {
 
     this.enforced = Object.create( null );
     this.blacklists = Object.create( null );
+    this.picked = [];
 };
 
 
@@ -77,25 +78,20 @@ SecretSanta.prototype.generate = function () {
 
     }, this );
 
-    var findNextGifter = function () {
-
-        var names = Object.keys( candidatePairings );
-
-        var minCandidateCount = _.min( names.map( function ( name ) { return candidatePairings[ name ].length; } ) );
-        var potentialGifters = names.filter( function ( name ) { return candidatePairings[ name ].length === minCandidateCount; } );
-
-        return _.sample( potentialGifters );
-
-    };
-
-    while ( Object.keys( candidatePairings ).length > 0 ) {
-
-        var name = findNextGifter();
-
+    var pickOutPairing = function (name) {
         if ( candidatePairings[ name ].length === 0 )
             throw new Error('We haven\'t been able to find a match for ' + name + '! Press "Generate" to try again and, if it still doesn\'t work, try removing some exclusions from your rules. Sorry for the inconvenience!');
 
-        var pairing = _.sample( candidatePairings[ name ] );
+        // Remove already picked candidate from the potential candidates
+        var picked = this.picked;
+        var potentialCandidate = candidatePairings[ name ].filter( function ( name ) { return !picked.includes(name); } );
+
+        if (potentialCandidate.length == 0) {
+            var pairing = _.sample( candidatePairings[ name ] );
+        } else {
+            var pairing = _.sample( potentialCandidate );
+        }
+
         delete candidatePairings[ name ];
 
         Object.keys( candidatePairings ).forEach( function ( name ) {
@@ -103,9 +99,26 @@ SecretSanta.prototype.generate = function () {
         } );
 
         pairings[ name ] = pairing;
+        
+        if (this.picked.length == 0 ) {
+            this.picked.push(name);
+            this.picked.push(pairing);
+        } else {
+            this.picked.push(pairing);
+        }
 
-    }
+        return pairing
+
+    }.bind( this );
+    
+    let picked = ''
+    Object.keys(candidatePairings).forEach(name => {
+        if ( Object.keys(pairings).length == 0) {
+            picked = pickOutPairing(name)
+        } else {
+            picked = pickOutPairing(picked)
+        }
+    })
 
     return pairings;
-
 };

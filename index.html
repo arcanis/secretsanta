@@ -239,6 +239,28 @@
 
       }
 
+      function validate(pairings) {
+        var names = Object.keys( pairings ).sort();
+        var namesValidator = Object.keys( pairings ).sort();
+
+        sequence = ''
+        nextuser = ''
+        for ( var t = 0, T = names.length; t < T; ++ t ) {
+            if (t == 0) { 
+                sequence = `${Object.keys(pairings)[0]} -> ${pairings[Object.keys(pairings)[0]]}`
+                nextuser = pairings[Object.keys(pairings)[0]]
+            } else {
+                sequence = `${sequence} -> ${pairings[nextuser]}`
+                nextuser = pairings[nextuser]
+            }
+            namesValidator = namesValidator.filter(function(e) { return e !== pairings[nextuser] })
+        }
+        
+        //console.log('Candidate sequence: ', sequence);
+        console.log('Its ok If array is empty, if not, the sequence is not perfect: ', namesValidator);
+        return namesValidator.length;
+      }
+
       function success( pairings ) {
 
           var result = document.getElementById( 'result' );
@@ -355,7 +377,9 @@
           }
 
           try {
-              return success( santa.generate() );
+              var pairings = santa.generate();
+              validate(pairings);
+              return success( pairings );
           } catch ( err ) {
             console.error(err.stack)
               return error( err.message );
