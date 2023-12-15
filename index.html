@@ -1,435 +1,452 @@
 <!doctype html>
 <html>
 
-    <head>
+<head>
 
-        <meta charset="utf-8" />
-        <title>Secret Santa Generator</title>
+    <meta charset="utf-8" />
+    <title>Secret Santa Generator</title>
 
-        <script src="vendors/Lodash-3.10.1.js"></script>
-        <script src="vendors/Cryptojs.aes-3.1.2.js"></script>
+    <script src="vendors/Lodash-3.10.1.js"></script>
+    <script src="vendors/Cryptojs.aes-3.1.2.js"></script>
 
-        <script src="./SecretSanta.js"></script>
+    <script src="./SecretSanta.js"></script>
 
-        <style>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
 
-            * {
-                box-sizing: border-box;
-            }
+        html,
+        body,
+        .main {
+            margin: 0;
 
-            html, body, .main {
-                margin: 0;
+            width: 100%;
+            height: 100%;
 
-                width: 100%;
-                height: 100%;
+            padding: 0;
+        }
 
-                padding: 0;
-            }
+        body {
+            background-image: url(assets/santa.png);
+            background-position: bottom right;
+            background-repeat: no-repeat;
 
-            body {
-                background-image: url(assets/santa.png);
-                background-position: bottom right;
-                background-repeat: no-repeat;
+            font-family: 'Comic Sans MS';
+        }
 
-                font-family: 'Comic Sans MS';
-            }
+        .main {
+            display: flex;
+        }
 
-            .main {
-                display: flex;
-            }
+        .part {
+            display: flex;
+            flex-direction: column;
 
-            .part {
-                display: flex;
-                flex-direction: column;
+            padding: 20px;
 
-                padding: 20px;
+            flex: 1;
+        }
 
-                flex: 1;
-            }
+        .instructions {
+            margin: auto 10%;
+        }
 
-            .instructions {
-                margin: auto 10%;
-            }
+        .instructions a {
+            text-decoration: none;
 
-            .instructions a {
-                text-decoration: none;
+            color: #0CB50C;
+        }
 
-                color: #0CB50C;
-            }
+        .input {
+            display: block;
+            align-self: stretch;
 
-            .input {
-                display: block;
-                align-self: stretch;
+            width: 100%;
+            flex: auto;
 
-                width: 100%;
-                flex: auto;
+            border: 10px solid #0CB50C;
+            border-radius: 10px;
 
-                border: 10px solid #0CB50C;
-                border-radius: 10px;
+            padding: 15px;
 
-                padding: 15px;
+            background-color: rgba(255, 255, 255, .7);
+            outline: none;
+        }
 
-                background-color: rgba(255, 255, 255, .7);
-                outline: none;
-            }
+        .generate {
+            display: block;
 
-            .generate {
-                display: block;
+            margin-top: 20px;
 
-                margin-top: 20px;
+            flex: none;
+            height: 100px;
 
-                flex: none;
-                height: 100px;
+            border: 10px solid #0CB50C;
+            border-radius: 10px;
 
-                border: 10px solid #0CB50C;
-                border-radius: 10px;
+            font-family: inherit;
+            font-size: 40px;
 
-                font-family: inherit;
-                font-size: 40px;
+            background-color: #EA1212;
+            color: #FFFFFF;
+        }
 
-                background-color: #EA1212;
-                color: #FFFFFF;
-            }
+        .generate:focus {
+            border-color: #E6E020;
 
-            .generate:focus {
-                border-color: #E6E020;
+            outline: none;
+        }
 
-                outline: none;
-            }
+        .result {
+            margin-top: 20px;
 
-            .result {
-                margin-top: 20px;
+            flex: none;
 
-                flex: none;
+            border: 10px solid #E6E020;
+            border-radius: 10px;
 
-                border: 10px solid #E6E020;
-                border-radius: 10px;
+            padding: 15px;
 
-                padding: 15px;
+            background: #FFFFFF;
+        }
 
-                background: #FFFFFF;
-            }
+        .result a {
+            color: blue;
+        }
 
-            .result a {
-                color: blue;
-            }
+        .result.none {
+            display: none;
+        }
 
-            .result.none {
-                display: none;
-            }
+        .result.error {
+            border-color: #EA1212;
 
-            .result.error {
-                border-color: #EA1212;
+            color: #EA1212;
+        }
 
-                color: #EA1212;
-            }
+        .result-table {
+            table-layout: fixed;
 
-            .result-table {
-                table-layout: fixed;
+            width: 100%;
+        }
 
-                width: 100%;
-            }
+        .result-name {
+            width: 30%;
 
-            .result-name {
-                width: 30%;
+            padding: 5px 8px;
+        }
 
-                padding: 5px 8px;
-            }
+        .result-link {
+            width: 100%;
+            overflow: hidden;
 
-            .result-link {
-                width: 100%;
-                overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+    </style>
 
-                text-overflow: ellipsis;
-                white-space: nowrap;
-            }
+</head>
 
-        </style>
+<body>
 
-    </head>
+    <div class="main">
 
-    <body>
-
-        <div class="main">
-
-            <div class="part" style="overflow-y: auto">
-                <div class="instructions">
-                    <h1><img src="assets/mistletoe.png" style="vertical-align: middle" /> Secret Santa Generator</h1>
-                    <p>No signup, no email, no bullshit. Just a straightforward <a href="https://github.com/arcanis/secretsanta">open-source</a> tool to help you generate your secret santa pairings. One static page, and that's it.</p>
-                    <p>In the most common case (no exclusion rules, pair each guest with another at random), enter the name of your guests one line at a time. Once done, press "generate" and you're all set: send the generated links to your guests (by mail, chat, whatever floats your boat) and their pairing will be revealed to them (and only them) once they open the link.</p>
-                    <h2>Where does this tool come from?</h2>
-                    <p>I wanted to make a Secret Santa over Facebook without having to reveal to anyone my guests email addresses (so nothing that would require a backend). I also wanted not to know who was paired with me, so I had to find a way to somehow obfuscate the information. And being a developer, well, my first thought was "Let's AES it, for fun and profits!". Classic.</p>
-                </div>
+        <div class="part" style="overflow-y: auto">
+            <div class="instructions">
+                <h1><img src="assets/mistletoe.png" style="vertical-align: middle" /> Gerador de Amigo Secreto</h1>
+                <p>Sem cadastro, sem e-mail, sem enrolação. Apenas uma ferramenta <a
+                        href="https://github.com/TalesRK/amigo-secreto">de código aberto</a> simples para ajudar a gerar
+                    as
+                    combinações do seu amigo secreto. Uma página estática, e é isso.</p>
+                <p>No caso mais comum (sem regras de exclusão, emparelhe cada convidado com outro aleatoriamente),
+                    insira o nome
+                    dos seus convidados uma linha de cada vez. Quando terminar, pressione "gerar" e pronto: envie os
+                    links
+                    gerados para seus convidados (por e-mail, chat, ou como preferir) e a combinação deles será revelada
+                    a eles
+                    (e somente a eles) quando abrirem o link.</p>
+                <h2>De onde vem essa ferramenta?</h2>
+                <p>Eu queria fazer um Amigo Secreto pelo Facebook sem ter que revelar os endereços de e-mail dos meus
+                    convidados
+                    a ninguém (então nada que precisasse de um backend). Também queria não saber quem estava emparelhado
+                    comigo,
+                    então tive que encontrar uma maneira de de alguma forma obscurecer a informação. E sendo um
+                    desenvolvedor,
+                    bom, meu primeiro pensamento foi "Vamos criptografar com AES, por diversão e lucro!". Clássico.</p>
             </div>
-
-            <form id="form" class="part">
-                <textarea id="input" class="input" autofocus></textarea>
-                <button type="submit" class="generate">Generate your pairings</button>
-                <div id="result" class="result none"></div>
-            </form>
 
         </div>
 
-        <script id="input-placeholder" type="text/placeholder">
-            # You can add a user by adding a line
-            Santa
+        <form id="form" class="part">
+            <textarea id="input" class="input" autofocus></textarea>
+            <button type="submit" class="generate">Generate your pairings</button>
+            <div id="result" class="result none"></div>
+        </form>
 
-            # You can add some details if you want to, using parentheses after the name
-            Nicholas (the elf)
+    </div>
 
-            # You can prevent someone from being paired with someone else
-            Maël !Aurélie
-            Aurélie !Maël
+    <script id="input-placeholder" type="text/placeholder">
+        # Você pode adicionar um usuário adicionando uma linha
+        Santa
 
-            # You can also exclude someone from being paired with multiple people
-            # Careful: too many exclusion rules can make your secret santa less interesting!
-            Rudolph !Santa !Nicholas (the elf)
+        # Você pode adicionar alguns detalhes se quiser, usando parênteses após o nome
+        Nicholas (o elfo)
 
-            # You can also cheat a bit and force someone to be paired with another
-            Nicholas (the saint) =Nicholas (the elf)
+        # Você pode impedir que alguém seja pareado com outra pessoa
+        Maël !Aurélie
+        Aurélie !Maël
 
-            ...
-        </script>
+        # Você também pode excluir alguém de ser pareado com várias pessoas
+        # Cuidado: muitas regras de exclusão podem tornar seu amigo secreto menos interessante!
+        Rudolph !Santa !Nicholas (o elfo)
 
-    </body>
+        # Você também pode trapacear um pouco e forçar alguém a ser pareado com outro
+        Nicholas (o santo) =Nicholas (o elfo)
 
-    <script>
-
-      function isAmazonEnabled() {
-
-          const checkBox = document.getElementById('amazon');
-
-          return checkBox ? checkBox.checked : false;
-
-      }
-
-      function persist() {
-
-          if ( ! window.localStorage )
-              return ;
-
-          var amazon = isAmazonEnabled();
-          var content = document.getElementById( 'input' ).value;
-
-          window.localStorage.setItem( 'amazon', amazon );
-          window.localStorage.setItem( 'input', content );
-
-      }
-
-      function restore() {
-
-          if ( ! window.localStorage )
-              return ;
-
-          var amazon = window.localStorage.getItem( 'amazon' );
-          var content = window.localStorage.getItem( 'input' );
-
-          if (typeof amazon === 'undefined')
-              amazon = true;
-
-          if (typeof content === 'undefined')
-              content = '';
-
-          if ( document.getElementById( 'amazon' ) )
-              document.getElementById( 'amazon' ).checked = amazon;
-
-          document.getElementById( 'input' ).value = content;
-
-      }
-
-      function reset() {
-
-          var result = document.getElementById( 'result' );
-
-          result.classList.add( 'none' );
-          result.classList.remove( 'error' );
-
-      }
-
-      function error(text) {
-
-          var result = document.getElementById( 'result' );
-
-          result.classList.remove( 'none' );
-          result.classList.add( 'error' );
-
-          result.innerText = text;
-
-      }
-
-      function success( pairings ) {
-
-          var result = document.getElementById( 'result' );
-
-          result.classList.remove( 'none' );
-          result.classList.remove( 'error' );
-
-          result.innerHTML = '';
-
-          var table = document.createElement( 'table' );
-          table.className = 'result-table';
-          result.appendChild( table );
-
-          var names = Object.keys( pairings ).sort();
-
-          for ( var t = 0, T = names.length; t < T; ++ t ) {
-
-              var name = names[ t ];
-              var prettyName = names[ t ].replace( /\([^)]+\)/g, ' ' ).replace( / +/g, ' ' ).trim();
-
-              var tr = document.createElement( 'tr' );
-              tr.className = 'result-row';
-              table.appendChild( tr );
-
-              var tdName = document.createElement( 'td' );
-              tdName.className = 'result-name';
-              tr.appendChild( tdName );
-
-              var tdLink = document.createElement( 'td' );
-              tdLink.className = 'result-link';
-              tr.appendChild( tdLink );
-
-              var link = document.createElement( 'a' );
-              tdLink.appendChild( link );
-
-              var key = String( _.random( 0x0000, 0xFFFF ) );
-              var encryptedPairing = CryptoJS.AES.encrypt( pairings[ name ], key );
-
-              var pairingPath = window.location.pathname.replace( /[^/]+$/, '' ) + 'pairing.html';
-              var pairingQueryString = '?name=' + encodeURIComponent( prettyName ) + '&key=' + encodeURIComponent( key ) + '&pairing=' + encodeURIComponent( encryptedPairing );
-
-              if ( isAmazonEnabled() )
-                  pairingQueryString += '&extra=1';
-
-              tdName.innerText = name;
-
-              link.addEventListener( 'click', protect );
-              link.setAttribute( 'data-name', name );
-              link.href = window.location.protocol + '//' + window.location.host + pairingPath + pairingQueryString;
-              link.target = '_blank';
-              link.innerText = link.href;
-
-          }
-
-      }
-
-      function updateAmazon() {
-
-          var result = document.getElementById( 'result' );
-          var links = result.getElementsByTagName( 'a' );
-
-          for ( var t = 0; t < links.length; ++t ) {
-
-              var link = links[t];
-
-              if ( isAmazonEnabled() )
-                  link.href += '&extra=1';
-              else
-                  link.href = link.href.replace( /&extra=[01]/, '' );
-
-              link.innerText = link.href;
-
-          }
-
-      }
-
-      function generate( e ) {
-
-          e.preventDefault();
-
-          var content = document.getElementById( 'input' ).value;
-
-          // Convert carriage returns into line feeds
-          content = content.replace( /(\r\n|\r)/g, '\n' );
-
-          // Merge adjacent blank characters into a single space
-          content = content.replace( /[ \t]+/g, ' ' );
-
-          // Trim lines
-          content = content.replace( /^ | $/gm, '' );
-
-          // Strip comments
-          content = content.replace( /^#.*$/gm, '' );
-
-          // Strip empty lines
-          content = content.replace( /\n+/g, '\n' );
-
-          // Remove leading/trailing newlines
-          content = content.replace( /^\n|\n$/g, '' );
-
-          var lines = content.split( /\n/g );
-
-          if ( lines.length === 0 || lines.length === 1 && lines[ 0 ].length === 0 )
-              return reset();
-
-          var santa = new SecretSanta();
-
-          for ( var t = 0, T = lines.length; t < T; ++ t ) {
-
-              var match = lines[ t ].match( /^((?:(?![!=]).)+)((?: [!=](?:(?! [!=]).)+)*)$/ );
-
-              if ( ! match )
-                  return error( 'Syntax error: "' + lines[ t ] + '" isn\'t valid' );
-
-              var name = match[ 1 ];
-              var rules = match[ 2 ] ? match[ 2 ].match(/[!=][^!=]+/g) : null;
-
-              var person = santa.add( name );
-
-              if (rules) {
-
-                  for ( var u = 0, U = rules.length; u < U; ++ u ) {
-
-                      var fnName = {
-
-                          '=': 'enforce',
-                          '!': 'blacklist'
-
-                      }[ rules[ u ].charAt( 0 ) ];
-
-                      person[ fnName ]( rules[ u ].slice( 1 ).trim() );
-
-                  }
-
-              }
-
-          }
-
-          try {
-              return success( santa.generate() );
-          } catch ( err ) {
-            console.error(err.stack)
-              return error( err.message );
-          }
-
-      }
-
-      function protect( e ) {
-
-          var name = e.currentTarget.getAttribute( 'data-name' );
-
-          if ( ! confirm( 'If you click this link, you will be revealed ' + name + '\'s pairing! Are you sure you want to do this? Only do this if you\'re actually ' + name + '.\n\nUse right-click to copy the link target instead.' ) ) {
-              e.preventDefault();
-          }
-
-      }
-
+        ...
     </script>
 
-    <script>
 
-        document.getElementById( 'input' ).placeholder = document.getElementById( 'input-placeholder' ).innerHTML.trim().replace( /^[ \t]+/gm, '' );
-        document.getElementById( 'input' ).addEventListener( 'change', persist );
+</body>
 
-        if ( document.getElementById( 'amazon' ) ) {
-            document.getElementById( 'amazon' ).addEventListener( 'change', updateAmazon );
-            document.getElementById( 'amazon' ).addEventListener( 'change', persist );
+<script>
+
+    function isAmazonEnabled() {
+
+        const checkBox = document.getElementById('amazon');
+
+        return checkBox ? checkBox.checked : false;
+
+    }
+
+    function persist() {
+
+        if (!window.localStorage)
+            return;
+
+        var amazon = isAmazonEnabled();
+        var content = document.getElementById('input').value;
+
+        window.localStorage.setItem('amazon', amazon);
+        window.localStorage.setItem('input', content);
+
+    }
+
+    function restore() {
+
+        if (!window.localStorage)
+            return;
+
+        var amazon = window.localStorage.getItem('amazon');
+        var content = window.localStorage.getItem('input');
+
+        if (typeof amazon === 'undefined')
+            amazon = true;
+
+        if (typeof content === 'undefined')
+            content = '';
+
+        if (document.getElementById('amazon'))
+            document.getElementById('amazon').checked = amazon;
+
+        document.getElementById('input').value = content;
+
+    }
+
+    function reset() {
+
+        var result = document.getElementById('result');
+
+        result.classList.add('none');
+        result.classList.remove('error');
+
+    }
+
+    function error(text) {
+
+        var result = document.getElementById('result');
+
+        result.classList.remove('none');
+        result.classList.add('error');
+
+        result.innerText = text;
+
+    }
+
+    function success(pairings) {
+
+        var result = document.getElementById('result');
+
+        result.classList.remove('none');
+        result.classList.remove('error');
+
+        result.innerHTML = '';
+
+        var table = document.createElement('table');
+        table.className = 'result-table';
+        result.appendChild(table);
+
+        var names = Object.keys(pairings).sort();
+
+        for (var t = 0, T = names.length; t < T; ++t) {
+
+            var name = names[t];
+            var prettyName = names[t].replace(/\([^)]+\)/g, ' ').replace(/ +/g, ' ').trim();
+
+            var tr = document.createElement('tr');
+            tr.className = 'result-row';
+            table.appendChild(tr);
+
+            var tdName = document.createElement('td');
+            tdName.className = 'result-name';
+            tr.appendChild(tdName);
+
+            var tdLink = document.createElement('td');
+            tdLink.className = 'result-link';
+            tr.appendChild(tdLink);
+
+            var link = document.createElement('a');
+            tdLink.appendChild(link);
+
+            var key = String(_.random(0x0000, 0xFFFF));
+            var encryptedPairing = CryptoJS.AES.encrypt(pairings[name], key);
+
+            var pairingPath = window.location.pathname.replace(/[^/]+$/, '') + 'pairing.html';
+            var pairingQueryString = '?name=' + encodeURIComponent(prettyName) + '&key=' + encodeURIComponent(key) + '&pairing=' + encodeURIComponent(encryptedPairing);
+
+            if (isAmazonEnabled())
+                pairingQueryString += '&extra=1';
+
+            tdName.innerText = name;
+
+            link.addEventListener('click', protect);
+            link.setAttribute('data-name', name);
+            link.href = window.location.protocol + '//' + window.location.host + pairingPath + pairingQueryString;
+            link.target = '_blank';
+            link.innerText = link.href;
+
         }
 
-        document.getElementById( 'form' ).addEventListener( 'submit', generate );
+    }
 
-        restore();
+    function updateAmazon() {
 
-    </script>
+        var result = document.getElementById('result');
+        var links = result.getElementsByTagName('a');
+
+        for (var t = 0; t < links.length; ++t) {
+
+            var link = links[t];
+
+            if (isAmazonEnabled())
+                link.href += '&extra=1';
+            else
+                link.href = link.href.replace(/&extra=[01]/, '');
+
+            link.innerText = link.href;
+
+        }
+
+    }
+
+    function generate(e) {
+
+        e.preventDefault();
+
+        var content = document.getElementById('input').value;
+
+        // Convert carriage returns into line feeds
+        content = content.replace(/(\r\n|\r)/g, '\n');
+
+        // Merge adjacent blank characters into a single space
+        content = content.replace(/[ \t]+/g, ' ');
+
+        // Trim lines
+        content = content.replace(/^ | $/gm, '');
+
+        // Strip comments
+        content = content.replace(/^#.*$/gm, '');
+
+        // Strip empty lines
+        content = content.replace(/\n+/g, '\n');
+
+        // Remove leading/trailing newlines
+        content = content.replace(/^\n|\n$/g, '');
+
+        var lines = content.split(/\n/g);
+
+        if (lines.length === 0 || lines.length === 1 && lines[0].length === 0)
+            return reset();
+
+        var santa = new SecretSanta();
+
+        for (var t = 0, T = lines.length; t < T; ++t) {
+
+            var match = lines[t].match(/^((?:(?![!=]).)+)((?: [!=](?:(?! [!=]).)+)*)$/);
+
+            if (!match)
+                return error('Syntax error: "' + lines[t] + '" isn\'t valid');
+
+            var name = match[1];
+            var rules = match[2] ? match[2].match(/[!=][^!=]+/g) : null;
+
+            var person = santa.add(name);
+
+            if (rules) {
+
+                for (var u = 0, U = rules.length; u < U; ++u) {
+
+                    var fnName = {
+
+                        '=': 'enforce',
+                        '!': 'blacklist'
+
+                    }[rules[u].charAt(0)];
+
+                    person[fnName](rules[u].slice(1).trim());
+
+                }
+
+            }
+
+        }
+
+        try {
+            return success(santa.generate());
+        } catch (err) {
+            console.error(err.stack)
+            return error(err.message);
+        }
+
+    }
+
+    function protect(e) {
+
+        var name = e.currentTarget.getAttribute('data-name');
+
+        if (!confirm('If you click this link, you will be revealed ' + name + '\'s pairing! Are you sure you want to do this? Only do this if you\'re actually ' + name + '.\n\nUse right-click to copy the link target instead.')) {
+            e.preventDefault();
+        }
+
+    }
+
+</script>
+
+<script>
+
+    document.getElementById('input').placeholder = document.getElementById('input-placeholder').innerHTML.trim().replace(/^[ \t]+/gm, '');
+    document.getElementById('input').addEventListener('change', persist);
+
+    if (document.getElementById('amazon')) {
+        document.getElementById('amazon').addEventListener('change', updateAmazon);
+        document.getElementById('amazon').addEventListener('change', persist);
+    }
+
+    document.getElementById('form').addEventListener('submit', generate);
+
+    restore();
+
+</script>
 
 </html>

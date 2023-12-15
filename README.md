@@ -1,6 +1,10 @@
 # Secret Santa
 
-Check it live on [arcanis.github.io/secretsanta/](http://arcanis.github.io/secretsanta/).
+This project is a fork of [arcanis.github.io/secretsanta/](http://arcanis.github.io/secretsanta/).
+
+The main difference is that the sequence generation ensures that the result is a full circle voiding inner loops, it means that you will only start only once and will pass through all persons without the possibility of one person get another one that has already gifted.
+
+You can check it on repl.it at https://replit.com/@TalesK/amigo-secreto
 
 ## License (MIT)
 

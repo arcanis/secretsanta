@@ -1,78 +1,83 @@
 <!doctype html>
 <html>
 
-    <head>
+<head>
 
-        <meta charset="utf-8" />
-        <title>Secret Santa Pairing</title>
+    <meta charset="utf-8" />
+    <title>Sorteio de Amigo Secreto</title>
 
-        <script src="vendors/Lodash-3.10.1.js"></script>
-        <script src="vendors/Cryptojs.aes-3.1.2.js"></script>
+    <script src="vendors/Lodash-3.10.1.js"></script>
+    <script src="vendors/Cryptojs.aes-3.1.2.js"></script>
 
-        <style>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
 
-            * {
-                box-sizing: border-box;
+        html,
+        body,
+        .main {
+            margin: 0;
+
+            width: 100%;
+            height: 100%;
+
+            padding: 0;
+        }
+
+        body {
+            background: url(./assets/snow.png), url(./assets/santa.png), url(./assets/snow.png), radial-gradient(#FB3B3B, #EF3D3D);
+            background-repeat: repeat, no-repeat, repeat, no-repeat;
+
+            animation-name: snow;
+            animation-duration: 5s;
+            animation-iteration-count: infinite;
+            animation-timing-function: linear;
+
+            font-family: 'Comic Sans MS';
+        }
+
+        @keyframes snow {
+            from {
+                background-position: 130px 40px, bottom right, 0 0, 0 0;
             }
 
-            html, body, .main {
-                margin: 0;
-
-                width: 100%;
-                height: 100%;
-
-                padding: 0;
+            to {
+                background-position: 130px 640px, bottom right, 0 300px, 0 0;
             }
+        }
 
-            body {
-                background: url(./assets/snow.png), url(./assets/santa.png), url(./assets/snow.png), radial-gradient(#FB3B3B, #EF3D3D);
-                background-repeat: repeat, no-repeat, repeat, no-repeat;
+        .spirit-of-christmas {
+            display: block;
 
-                animation-name: snow;
-                animation-duration: 5s;
-                animation-iteration-count: infinite;
-                animation-timing-function: linear;
+            position: absolute;
+            bottom: 0;
+            left: 0;
 
-                font-family: 'Comic Sans MS';
-            }
+            padding: 20px;
 
-            @keyframes snow {
-                from { background-position: 130px 40px, bottom right, 0 0, 0 0; }
-                to { background-position: 130px 640px, bottom right, 0 300px, 0 0; }
-            }
+            font-size: 10px;
+            text-decoration: none;
 
-            .spirit-of-christmas {
-                display: block;
+            color: #FFFFFF;
+        }
 
-                position: absolute;
-                bottom: 0;
-                left: 0;
+        .main {
+            display: flex;
+        }
 
-                padding: 20px;
+        .background {
+            position: absolute;
 
-                font-size: 10px;
-                text-decoration: none;
+            left: 0;
+            bottom: 0;
+        }
 
-                color: #FFFFFF;
-            }
+        .wrapper {
+            margin: auto;
+            padding: 20px;
 
-            .main {
-                display: flex;
-            }
-
-            .background {
-                position: absolute;
-
-                left: 0;
-                bottom: 0;
-            }
-
-            .wrapper {
-                margin: auto;
-                padding: 20px;
-
-                background: repeating-linear-gradient(
-                    45deg,
+            background: repeating-linear-gradient(45deg,
                     #5CC48A,
                     #5CC48A 30px,
                     #FFFFFF 30px,
@@ -80,107 +85,97 @@
                     #EF3D3D 60px,
                     #EF3D3D 90px,
                     #FFFFFF 90px,
-                    #FFFFFF 120px
-                );
+                    #FFFFFF 120px);
 
-                box-shadow: 3px 3px 10px rgba(0, 0, 0, .5);
-            }
+            box-shadow: 3px 3px 10px rgba(0, 0, 0, .5);
+        }
 
-            .content {
-                padding: 40px;
+        .content {
+            padding: 40px;
 
-                background: #ffffff;
+            background: #ffffff;
 
-                text-align: center;
-            }
+            text-align: center;
+        }
 
-            .title {
-                font-size: 30px;
-            }
+        .title {
+            font-size: 30px;
+        }
 
-            #pairing-name {
-                font-size: 90px;
-            }
+        #pairing-name {
+            font-size: 90px;
+        }
 
-            #pairing-details {
-                margin-bottom: 20px;
+        #pairing-details {
+            margin-bottom: 20px;
 
-                font-size: 20px;
-            }
+            font-size: 20px;
+        }
 
-            .affiliate {
-                display: block;
-                box-sizing: content-box;
+        .affiliate {
+            display: block;
+            box-sizing: content-box;
 
-                margin-top: 40px;
+            margin-top: 40px;
 
-                border: none;
+            border: none;
 
-                background: rgba(255, 255, 255, .7);
-            }
+            background: rgba(255, 255, 255, .7);
+        }
 
-            .affiliate + .affiliate {
-                margin-top: 40px;
-            }
+        .affiliate+.affiliate {
+            margin-top: 40px;
+        }
+    </style>
 
-        </style>
+    <script>
 
-        <script>
+        var queryString = _.chain(location.search.slice(1).split(/&/g))
+            .map(function (item) {if (item) return item.split(/=/).map(function (str) {return decodeURIComponent(str);});})
+            .compact().object().value();
 
-            var queryString = _.chain( location.search.slice( 1 ).split( /&/g ) )
-                .map( function ( item ) { if ( item ) return item.split( /=/ ).map( function ( str ) { return decodeURIComponent( str ); } ); } )
-                .compact().object().value();
+        var name = queryString.name;
 
-            var name = queryString.name;
+        var pairing = CryptoJS.AES.decrypt(queryString.pairing, queryString.key).toString(CryptoJS.enc.Utf8);
+        var pairingDefinition = pairing.match(/^([^(]+)(?: (\([^)]+\)))?$/);
 
-            var pairing = CryptoJS.AES.decrypt( queryString.pairing, queryString.key ).toString(CryptoJS.enc.Utf8);
-            var pairingDefinition = pairing.match( /^([^(]+)(?: (\([^)]+\)))?$/ );
+    </script>
 
-        </script>
+</head>
 
-    </head>
+<body>
 
-    <body>
+    <div class="main">
+        <div class="wrapper">
+            <div class="content">
 
-        <div class="main">
+                <div class="title">Oi <span id="name"></span>! Você foi pareado(a) com</div>
+                <script>document.getElementById('name').innerText = name</script>
 
-            <div class="wrapper">
-                <div class="content">
-
-                    <div class="title">Hi <span id="name"></span>! You've been paired with</div>
-                    <script>document.getElementById('name').innerText = name</script>
-
-                    <div class="pairing">
-                        <div id="pairing-name"></div>
-                        <div id="pairing-details"></div>
-                        <script>
-                            document.getElementById('pairing-name').innerText = pairingDefinition[1];
-
-                            if (pairingDefinition[2]) {
-                                document.getElementById('pairing-details').innerText = pairingDefinition[2];
-                            } else {
-                                document.getElementById('pairing-details').style.display = 'none';
-                            }
-                        </script>
-                    </div>
-
-                    <div class="title">Good luck!</div>
-
+                <div class="pairing">
+                    <div id="pairing-name"></div>
+                    <div id="pairing-details"></div>
                     <script>
-                        if (queryString.extra) {
-                            document.write('<iframe class="affiliate" src="http://rcm-eu.amazon-adsystem.com/e/cm?t=secrsant02e-21&o=8&p=48&l=ur1&category=books&banner=10DQAXJ7D1D2VTXMR682&f=ifr" width="728" height="90" scrolling="no" border="0" marginwidth="0" frameborder="0"></iframe>');
+                        document.getElementById('pairing-name').innerText = pairingDefinition[1];
+
+                        if (pairingDefinition[2]) {
+                            document.getElementById('pairing-details').innerText = pairingDefinition[2];
+                        } else {
+                            document.getElementById('pairing-details').style.display = 'none';
                         }
                     </script>
-
                 </div>
+
+                <div class="title">Boa sorte!</div>
             </div>
-
-            <a href="http://arcanis.github.io/secretsanta/" class="spirit-of-christmas">
-                Want to start your own Secret Santa with your friends? Click here to get started!
-            </a>
-
         </div>
 
-    </body>
+        <a href="https://github.com/TalesRK/amigo-secreto" class="spirit-of-christmas">
+            Quer começar o seu próprio Amigo Secreto com seus amigos? Clique aqui para começar!
+        </a>
+
+    </div>
+
+</body>
 
 </html>
