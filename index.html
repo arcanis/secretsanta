@@ -31,7 +31,7 @@
                 background-position: bottom right;
                 background-repeat: no-repeat;
 
-                font-family: 'Comic Sans MS';
+                font-family: Arial, Helvetica, sans-serif;;
             }
 
             .main {
@@ -157,8 +157,8 @@
                     <h1><img src="assets/mistletoe.png" style="vertical-align: middle" /> Secret Santa Generator</h1>
                     <p>No signup, no email, no bullshit. Just a straightforward <a href="https://github.com/jose-oc/secretsanta">open-source</a> tool to help you generate your secret santa pairings. One static page, and that's it.</p>
                     <p>In the most common case (no exclusion rules, pair each guest with another at random), enter the name of your guests one line at a time. Once done, press "generate" and you're all set: send the generated links to your guests (by mail, chat, whatever floats your boat) and their pairing will be revealed to them (and only them) once they open the link.</p>
-                    <h2>Where does this tool come from?</h2>
-                    <p>I wanted to make a Secret Santa over Facebook without having to reveal to anyone my guests email addresses (so nothing that would require a backend). I also wanted not to know who was paired with me, so I had to find a way to somehow obfuscate the information. And being a developer, well, my first thought was "Let's AES it, for fun and profits!". Classic.</p>
+                    <h2 class="headline">Where does this tool come from?</h2>
+                    <p><a href="https://github.com/arcanis/secretsanta">https://github.com/arcanis/secretsanta</a></p>
                 </div>
             </div>
 
@@ -195,23 +195,13 @@
 
     <script>
 
-      function isAmazonEnabled() {
-
-          const checkBox = document.getElementById('amazon');
-
-          return checkBox ? checkBox.checked : false;
-
-      }
-
       function persist() {
 
           if ( ! window.localStorage )
               return ;
 
-          var amazon = isAmazonEnabled();
           var content = document.getElementById( 'input' ).value;
 
-          window.localStorage.setItem( 'amazon', amazon );
           window.localStorage.setItem( 'input', content );
 
       }
@@ -221,17 +211,10 @@
           if ( ! window.localStorage )
               return ;
 
-          var amazon = window.localStorage.getItem( 'amazon' );
           var content = window.localStorage.getItem( 'input' );
-
-          if (typeof amazon === 'undefined')
-              amazon = true;
 
           if (typeof content === 'undefined')
               content = '';
-
-          if ( document.getElementById( 'amazon' ) )
-              document.getElementById( 'amazon' ).checked = amazon;
 
           document.getElementById( 'input' ).value = content;
 
@@ -298,35 +281,12 @@
               var pairingPath = window.location.pathname.replace( /[^/]+$/, '' ) + 'pairing.html';
               var pairingQueryString = '?name=' + encodeURIComponent( prettyName ) + '&key=' + encodeURIComponent( key ) + '&pairing=' + encodeURIComponent( encryptedPairing );
 
-              if ( isAmazonEnabled() )
-                  pairingQueryString += '&extra=1';
-
               tdName.innerText = name;
 
               link.addEventListener( 'click', protect );
               link.setAttribute( 'data-name', name );
               link.href = window.location.protocol + '//' + window.location.host + pairingPath + pairingQueryString;
               link.target = '_blank';
-              link.innerText = link.href;
-
-          }
-
-      }
-
-      function updateAmazon() {
-
-          var result = document.getElementById( 'result' );
-          var links = result.getElementsByTagName( 'a' );
-
-          for ( var t = 0; t < links.length; ++t ) {
-
-              var link = links[t];
-
-              if ( isAmazonEnabled() )
-                  link.href += '&extra=1';
-              else
-                  link.href = link.href.replace( /&extra=[01]/, '' );
-
               link.innerText = link.href;
 
           }
@@ -420,11 +380,6 @@
 
         document.getElementById( 'input' ).placeholder = document.getElementById( 'input-placeholder' ).innerHTML.trim().replace( /^[ \t]+/gm, '' );
         document.getElementById( 'input' ).addEventListener( 'change', persist );
-
-        if ( document.getElementById( 'amazon' ) ) {
-            document.getElementById( 'amazon' ).addEventListener( 'change', updateAmazon );
-            document.getElementById( 'amazon' ).addEventListener( 'change', persist );
-        }
 
         document.getElementById( 'form' ).addEventListener( 'submit', generate );
 
