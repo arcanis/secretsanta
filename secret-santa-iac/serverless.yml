@@ -1,0 +1,39 @@
+# serverless.yml
+service: secret-santa-iac
+frameworkVersion: '3'  # Ensure compatibility with Serverless v3
+
+provider:
+  name: aws
+  runtime: go1.x  # Set runtime as Go for Lambda function setup later
+  region: eu-west-1  # Specify AWS region
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - s3:PutObject
+            - s3:GetObject
+            - s3:DeleteObject
+          Resource:
+            - arn:aws:s3:::${self:custom.bucketName}/*
+
+custom:
+  bucketName: secret-santa-pairings-${sls:stage}  # Unique bucket name for each stage
+
+resources:
+  Resources:
+    SecretSantaBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:custom.bucketName}
+        LifecycleConfiguration:
+          Rules:
+            - Id: "AutoDeleteExpiredTokens"
+              Status: Enabled
+              ExpirationInDays: 7  # Automatically delete files after 7 days
+  Outputs:
+    BucketName:
+      Description: "Name of the S3 bucket for storing Secret Santa tokens"
+      Value: !Ref SecretSantaBucket
+
+functions: {}  # Placeholder for Lambda functions (we'll add these later)
