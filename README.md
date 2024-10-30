@@ -27,6 +27,13 @@ Install serverless framework
 npm install -g serverless@3.38.0
 ```
 
+### Compila the function
+
+```
+cd function
+GOOS=linux GOARCH=amd64 go build -o pairing pairing.go
+```
+
 ### Create infrastructure
 
 First, create an AWS user:

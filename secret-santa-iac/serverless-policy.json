@@ -31,7 +31,8 @@
 				"iam:CreateRole",
 				"iam:DeleteRole",
 				"iam:AttachRolePolicy",
-				"iam:DetachRolePolicy"
+				"iam:DetachRolePolicy",
+				"apigateway:PUT"
 			],
 			"Resource": "*"
 		}

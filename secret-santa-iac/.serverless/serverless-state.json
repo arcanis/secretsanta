@@ -7,7 +7,7 @@
     "provider": {
       "name": "aws",
       "runtime": "go1.x",
-      "region": "us-east-1",
+      "region": "eu-west-1",
       "iam": {
         "role": {
           "statements": [
@@ -268,7 +268,7 @@
     "isDashboardMonitoringPreconfigured": false
   },
   "package": {
-    "artifactDirectoryName": "serverless/secret-santa-iac/dev/1730233313482-2024-10-29T20:21:53.482Z",
+    "artifactDirectoryName": "serverless/secret-santa-iac/dev/1730292312673-2024-10-30T12:45:12.673Z",
     "artifact": ""
   }
 }
