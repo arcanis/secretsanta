@@ -12,6 +12,125 @@
 
         <script src="./SecretSanta.js"></script>
 
+        <script>
+                async function success(pairings) {
+
+                    const apiUrl = "https://v9x9by1gyf.execute-api.eu-west-1.amazonaws.com/dev/pairing";
+
+                    var result = document.getElementById('result');
+
+                    result.classList.remove('none');
+                    result.classList.remove('error');
+
+                    result.innerHTML = '';
+
+                    var table = document.createElement('table');
+                    table.className = 'result-table';
+                    result.appendChild(table);
+
+                    var names = Object.keys(pairings).sort();
+
+                    for (var t = 0, T = names.length; t < T; ++t) {
+
+                        var name = names[t];
+                        var prettyName = names[t].replace(/\([^)]+\)/g, ' ').replace(/ +/g, ' ').trim();
+
+                        var tr = document.createElement('tr');
+                        tr.className = 'result-row';
+                        table.appendChild(tr);
+
+                        var tdName = document.createElement('td');
+                        tdName.className = 'result-name';
+                        tr.appendChild(tdName);
+
+                        var tdLink = document.createElement('td');
+                        tdLink.className = 'result-link';
+                        tr.appendChild(tdLink);
+
+                        var link = document.createElement('a');
+                        tdLink.appendChild(link);
+
+                        var key = String(_.random(0x0000, 0xFFFF));
+                        var encryptedPairing = CryptoJS.AES.encrypt(pairings[name], key);
+
+                        // JOC create the token on the backend
+                        const token = await createToken(prettyName, pairings[name], apiUrl);
+                        if (!token) {
+                            console.error(`Failed to create token for ${name}`);
+                            continue;
+                        }
+
+                        var pairingPath = window.location.pathname.replace(/[^/]+$/, '') + 'pairing.html';
+                        var pairingQueryString = '?name=' + encodeURIComponent(prettyName) + '&key=' + encodeURIComponent(key) + '&pairing=' + encodeURIComponent(encryptedPairing) + '&token=' + encodeURIComponent(token);
+
+                        tdName.innerText = name;
+
+                        link.addEventListener('click', protect);
+                        link.setAttribute('data-name', name);
+                        link.href = window.location.protocol + '//' + window.location.host + pairingPath + pairingQueryString;
+                        link.target = '_blank';
+                        link.innerText = link.href;
+
+                    }
+
+                }
+            async function generatePairingLinks(pairings) {
+                const apiUrl = "https://v9x9by1gyf.execute-api.eu-west-1.amazonaws.com/dev/pairing";
+                const resultElement = document.getElementById('result');
+                resultElement.innerHTML = '';
+
+                for (const [name, giftee] of Object.entries(pairings)) {
+                    const token = await createToken(name, giftee, apiUrl);
+                    if (!token) {
+                        console.error(`Failed to create token for ${name}`);
+                        continue;
+                    }
+
+                    // Generate the pairing link pointing to pairing.html with the token parameter
+                    const pairingUrl = `${window.location.origin}/pairing.html?token=${encodeURIComponent(token)}`;
+                    const linkElement = document.createElement("a");
+                    linkElement.href = pairingUrl;
+                    linkElement.target = "_blank";
+                    linkElement.innerText = `Link for ${name}`;
+
+                    // Append the link to the result section
+                    const linkWrapper = document.createElement("div");
+                    linkWrapper.appendChild(linkElement);
+                    resultElement.appendChild(linkWrapper);
+                }
+            }
+
+            async function createToken(gifter, giftee, apiUrl) {
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ gifter, giftee })
+                    });
+                    const data = await response.json();
+                    return data.token;
+                } catch (error) {
+                    console.error("Error creating token:", error);
+                    return null;
+                }
+            }
+
+            function createTokenSync(gifter, giftee, apiUrl) {
+                try {
+                    const response = fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ gifter, giftee })
+                    });
+                    const data = response.json();
+                    return data.token;
+                } catch (error) {
+                    console.error("Error creating token:", error);
+                    return null;
+                }
+            }
+        </script>
+
         <style>
 
             * {
@@ -241,58 +360,67 @@
 
       }
 
-      function success( pairings ) {
+    //   function success( pairings ) {
 
-          var result = document.getElementById( 'result' );
+    //       const apiUrl = "https://v9x9by1gyf.execute-api.eu-west-1.amazonaws.com/dev/pairing";
 
-          result.classList.remove( 'none' );
-          result.classList.remove( 'error' );
+    //       var result = document.getElementById( 'result' );
 
-          result.innerHTML = '';
+    //       result.classList.remove( 'none' );
+    //       result.classList.remove( 'error' );
 
-          var table = document.createElement( 'table' );
-          table.className = 'result-table';
-          result.appendChild( table );
+    //       result.innerHTML = '';
 
-          var names = Object.keys( pairings ).sort();
+    //       var table = document.createElement( 'table' );
+    //       table.className = 'result-table';
+    //       result.appendChild( table );
 
-          for ( var t = 0, T = names.length; t < T; ++ t ) {
+    //       var names = Object.keys( pairings ).sort();
 
-              var name = names[ t ];
-              var prettyName = names[ t ].replace( /\([^)]+\)/g, ' ' ).replace( / +/g, ' ' ).trim();
+    //       for ( var t = 0, T = names.length; t < T; ++ t ) {
 
-              var tr = document.createElement( 'tr' );
-              tr.className = 'result-row';
-              table.appendChild( tr );
+    //           var name = names[ t ];
+    //           var prettyName = names[ t ].replace( /\([^)]+\)/g, ' ' ).replace( / +/g, ' ' ).trim();
 
-              var tdName = document.createElement( 'td' );
-              tdName.className = 'result-name';
-              tr.appendChild( tdName );
+    //           var tr = document.createElement( 'tr' );
+    //           tr.className = 'result-row';
+    //           table.appendChild( tr );
 
-              var tdLink = document.createElement( 'td' );
-              tdLink.className = 'result-link';
-              tr.appendChild( tdLink );
+    //           var tdName = document.createElement( 'td' );
+    //           tdName.className = 'result-name';
+    //           tr.appendChild( tdName );
 
-              var link = document.createElement( 'a' );
-              tdLink.appendChild( link );
+    //           var tdLink = document.createElement( 'td' );
+    //           tdLink.className = 'result-link';
+    //           tr.appendChild( tdLink );
 
-              var key = String( _.random( 0x0000, 0xFFFF ) );
-              var encryptedPairing = CryptoJS.AES.encrypt( pairings[ name ], key );
+    //           var link = document.createElement( 'a' );
+    //           tdLink.appendChild( link );
 
-              var pairingPath = window.location.pathname.replace( /[^/]+$/, '' ) + 'pairing.html';
-              var pairingQueryString = '?name=' + encodeURIComponent( prettyName ) + '&key=' + encodeURIComponent( key ) + '&pairing=' + encodeURIComponent( encryptedPairing );
+    //           var key = String( _.random( 0x0000, 0xFFFF ) );
+    //           var encryptedPairing = CryptoJS.AES.encrypt( pairings[ name ], key );
 
-              tdName.innerText = name;
+    //           // JOC create the token on the backend
+    //           var token = createTokenSync(prettyName, pairings[ name ], apiUrl);
+    //           if (!token) {
+    //             console.error(`Failed to create token for ${name}`);
+    //             continue;
+    //           }
 
-              link.addEventListener( 'click', protect );
-              link.setAttribute( 'data-name', name );
-              link.href = window.location.protocol + '//' + window.location.host + pairingPath + pairingQueryString;
-              link.target = '_blank';
-              link.innerText = link.href;
+    //           var pairingPath = window.location.pathname.replace( /[^/]+$/, '' ) + 'pairing.html';
+    //           var pairingQueryString = '?name=' + encodeURIComponent( prettyName ) + '&key=' + encodeURIComponent( key ) + '&pairing=' + encodeURIComponent( encryptedPairing ) + '&token=' + encodeURIComponent( token );
 
-          }
+    //           tdName.innerText = name;
 
-      }
+    //           link.addEventListener( 'click', protect );
+    //           link.setAttribute( 'data-name', name );
+    //           link.href = window.location.protocol + '//' + window.location.host + pairingPath + pairingQueryString;
+    //           link.target = '_blank';
+    //           link.innerText = link.href;
+
+    //       }
+
+    //   }
 
       function generate( e ) {
 
@@ -358,6 +486,7 @@
 
           try {
               return success( santa.generate() );
+              // return generatePairingLinks( santa.generate() );
           } catch ( err ) {
             console.error(err.stack)
               return error( err.message );

@@ -1,91 +1,105 @@
 import json
 import boto3
 import logging
+import uuid
 from botocore.exceptions import ClientError
 
 # Set up logging
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-# Define S3 bucket name
-BUCKET_NAME = 'secret-santa-pairings-dev'  # Update based on your stage
-
 s3_client = boto3.client('s3')
+BUCKET_NAME = 'secret-santa-pairings-dev'  # Adjust based on your environment
 
 def handler(event, context):
-    # Get the token from query parameters
-    token = event.get("queryStringParameters", {}).get("token")
-    if not token:
-        logger.error("No token provided in request.")
+    http_method = event['httpMethod']
+    
+    if http_method == 'POST':
+        return create_token(event)
+    elif http_method == 'GET':
+        return get_pairing(event)
+    else:
         return {
-            "statusCode": 400,
-            "body": json.dumps({"error": "Token is required"})
+            "statusCode": 405,
+            "headers": {
+                "Access-Control-Allow-Origin": "*"
+            },
+            "body": json.dumps({"error": "Method not allowed"})
         }
 
-    # Retrieve the token data from S3
-    try:
-        token_data = get_token_data(token)
-    except ClientError as e:
-        error_code = e.response['Error']['Code']
-        logger.error(f"Error retrieving token: {error_code}")
-        if error_code == 'NoSuchKey':
-            return {
-                "statusCode": 404,
-                "body": json.dumps({"error": "Token not found"})
-            }
-        return {
-            "statusCode": 500,
-            "body": json.dumps({"error": "Internal server error"})
-        }
+def create_token(event):
+    body = json.loads(event['body'])
+    gifter = body.get("gifter")
+    giftee = body.get("giftee")
+    token = str(uuid.uuid4())  # Generate a unique token
 
-    # Check if the token has already been used
-    if token_data.get("status") == "used":
-        logger.info(f"Token {token} has already been used.")
-        return {
-            "statusCode": 403,
-            "body": json.dumps({"error": "Token already used"})
-        }
-
-    # Update the token status to "used"
-    token_data["status"] = "used"
-    if not update_token_data(token, token_data):
-        logger.error(f"Failed to update status for token {token}.")
-        return {
-            "statusCode": 500,
-            "body": json.dumps({"error": "Failed to update token status"})
-        }
-
-    # Return the pairing details
-    response_body = {
-        "gifter": token_data.get("gifter"),
-        "giftee": token_data.get("giftee")
+    token_data = {
+        "token": token,
+        "gifter": gifter,
+        "giftee": giftee,
+        "status": "unused"
     }
 
-    return {
-        "statusCode": 200,
-        "body": json.dumps(response_body)
-    }
-
-def get_token_data(token):
-    key = f"{token}.json"
-    try:
-        response = s3_client.get_object(Bucket=BUCKET_NAME, Key=key)
-        token_data = json.loads(response['Body'].read().decode("utf-8"))
-        return token_data
-    except ClientError as e:
-        logger.error(f"Error retrieving data for token {token}: {e}")
-        raise
-
-def update_token_data(token, token_data):
-    key = f"{token}.json"
     try:
         s3_client.put_object(
             Bucket=BUCKET_NAME,
-            Key=key,
+            Key=f"{token}.json",
             Body=json.dumps(token_data),
             ContentType="application/json"
         )
-        return True
     except ClientError as e:
-        logger.error(f"Error updating data for token {token}: {e}")
-        return False
+        logger.error(f"Error creating the token file in S3: {error_code}")
+        return {
+            "statusCode": 500,
+            "headers": {"Access-Control-Allow-Origin": "*"},
+            "body": json.dumps({"error": "Failed to create token", "details": str(e)})
+        }
+
+    return {
+        "statusCode": 200,
+        "headers": {
+            "Access-Control-Allow-Origin": "*"
+        },
+        "body": json.dumps({"token": token})
+    }
+
+def get_pairing(event):
+    token = event.get("queryStringParameters", {}).get("token")
+    if not token:
+        logger.error("No token provided in request.")
+        return {"statusCode": 400, 
+                "headers": {"Access-Control-Allow-Origin": "*"},
+                "body": json.dumps({"error": "Token is required as query param"})
+                }
+
+    try:
+        response = s3_client.get_object(Bucket=BUCKET_NAME, Key=f"{token}.json")
+        token_data = json.loads(response['Body'].read())
+        
+        if token_data["status"] == "used":
+            return {
+                "statusCode": 403, 
+                "headers": {"Access-Control-Allow-Origin": "*"},
+                "body": json.dumps({"error": "Token already used"})
+                }
+        
+        token_data["status"] = "used"
+        s3_client.put_object(
+            Bucket=BUCKET_NAME,
+            Key=f"{token}.json",
+            Body=json.dumps(token_data),
+            ContentType="application/json"
+        )
+        
+        return {
+            "statusCode": 200,
+            "headers": {
+                "Access-Control-Allow-Origin": "*"
+            },
+            "body": json.dumps({"gifter": token_data["gifter"], "giftee": token_data["giftee"]})
+        }
+    except ClientError as e:
+        if e.response['Error']['Code'] == "NoSuchKey":
+            return {"statusCode": 404, "headers": {"Access-Control-Allow-Origin": "*"},"body": json.dumps({"error": "Token not found"})}
+        logger.error(f"Error retrieving token: {e}")
+        return {"statusCode": 500, "headers": {"Access-Control-Allow-Origin": "*"},"body": json.dumps({"error": "Internal server error", "details": str(e)})}

@@ -29,11 +29,12 @@ functions:
     events:
       - http:
           path: pairing
-          method: get
-          request:
-            parameters:
-              querystrings:
-                token: true
+          method: any
+          cors: true
+          # request:
+          #   parameters:
+          #     querystrings:
+          #       token: true
 
 resources:
   Resources:
@@ -45,7 +46,7 @@ resources:
           Rules:
             - Id: "AutoDeleteExpiredTokens"
               Status: Enabled
-              ExpirationInDays: 7  # Automatically delete files after 7 days
+              ExpirationInDays: 2
   Outputs:
     BucketName:
       Description: "Name of the S3 bucket for storing Secret Santa tokens"

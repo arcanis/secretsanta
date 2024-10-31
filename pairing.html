@@ -141,31 +141,33 @@
         </script>
 
         <script>
-        async function fetchPairing() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const token = urlParams.get('token');
+            // Fetch token from the backend to make sure this page has never been seen before
+            async function isPageAlreadySeen() {
+                const urlParams = new URLSearchParams(window.location.search);
+                const token = urlParams.get('token');
 
-            if (!token) {
-                document.getElementById('pairing-details').innerText = "Invalid or missing token.";
-                return;
-            }
-
-            try {
-                const response = await fetch(`https://v9x9by1gyf.execute-api.eu-west-1.amazonaws.com/dev/pairing?token=${token}`);
-                const data = await response.json();
-
-                if (response.ok) {
-                    document.getElementById('pairing-name').innerText = data.giftee;
-                    document.getElementById('name').innerText = data.gifter;
-                } else {
-                    document.getElementById('pairing-details').innerText = data.error;
+                if (!token) {
+                    document.getElementById('pairing-name').innerText = "Invalid or missing token.";
+                    return;
                 }
-            } catch (error) {
-                document.getElementById('pairing-details').innerText = "Error retrieving pairing information.";
-            }
-        }
 
-        fetchPairing();
+                try {
+                    // Fetch pairing details from Lambda
+                    const response = await fetch(`https://v9x9by1gyf.execute-api.eu-west-1.amazonaws.com/dev/pairing?token=${token}`);
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        console.log("page never seen before");
+                        return false;
+                    } else {
+                        console.log("Giftee already seen");
+                        return true;
+                    }
+                } catch (error) {
+                    console.log("Error checking information.");
+                    return true;
+                }
+            }
         </script>
 
     </head>
@@ -190,13 +192,15 @@
                     </div>
         
                     <script>
-                        document.getElementById('reveal-button').addEventListener('click', function () {
-                            document.getElementById('pairing-name').innerText = pairingDefinition[1];
-        
-                            if (pairingDefinition[2]) {
-                                document.getElementById('pairing-details').innerText = pairingDefinition[2];
+                        document.getElementById('reveal-button').addEventListener('click', async function () {
+                            const pageAlreadySeen = await isPageAlreadySeen();
+
+                            if (pageAlreadySeen) {
+                                document.getElementById('pairing-name').innerText = "Name already seen";
+                                document.getElementById('pairing-details').innerText = "You can only see this once";
                             }
                             else {
+                                document.getElementById('pairing-name').innerText = pairingDefinition[1];
                                 document.getElementById('pairing-details').style.display = 'none';
                             }
         
