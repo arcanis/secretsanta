@@ -1,24 +1,39 @@
 # serverless.yml
 service: secret-santa-iac
-frameworkVersion: '3'  # Ensure compatibility with Serverless v3
 
 provider:
   name: aws
-  runtime: go1.x  # Set runtime as Go for Lambda function setup later
-  region: eu-west-1  # Specify AWS region
+  runtime: python3.11
+  region: eu-west-1
   iam:
     role:
       statements:
-        - Effect: Allow
+        - Effect: "Allow"
           Action:
-            - s3:PutObject
-            - s3:GetObject
-            - s3:DeleteObject
+            - "s3:ListBucket"
           Resource:
-            - arn:aws:s3:::${self:custom.bucketName}/*
+            - "arn:aws:s3:::${self:custom.bucketName}"
+        - Effect: "Allow"
+          Action:
+            - "s3:GetObject"
+            - "s3:PutObject"
+          Resource:
+            - "arn:aws:s3:::${self:custom.bucketName}/*"
 
 custom:
   bucketName: secret-santa-pairings-${sls:stage}  # Unique bucket name for each stage
+
+functions:
+  pairingFunction:
+    handler: pairing.handler
+    events:
+      - http:
+          path: pairing
+          method: get
+          request:
+            parameters:
+              querystrings:
+                token: true
 
 resources:
   Resources:
@@ -35,5 +50,3 @@ resources:
     BucketName:
       Description: "Name of the S3 bucket for storing Secret Santa tokens"
       Value: !Ref SecretSantaBucket
-
-functions: {}  # Placeholder for Lambda functions (we'll add these later)

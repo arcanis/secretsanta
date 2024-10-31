@@ -1,0 +1,108 @@
+{
+	"Version": "2012-10-17",
+	"Statement": [
+		{
+			"Effect": "Allow",
+			"Action": [
+				"cloudformation:ValidateTemplate"
+			],
+			"Resource": "arn:aws:cloudformation:*:307086644013:stack/*/*"
+		},
+		{
+			"Effect": "Allow",
+			"Action": [
+				"cloudformation:CreateStack",
+				"cloudformation:UpdateStack",
+				"cloudformation:DescribeStacks",
+				"cloudformation:DescribeStackResources",
+				"cloudformation:GetTemplate",
+				"cloudformation:DeleteStack",
+				"cloudformation:DescribeStackResource"
+			],
+			"Resource": "arn:aws:cloudformation:eu-west-1:307086644013:stack/secret-santa-iac-*/*"
+		},
+		{
+			"Effect": "Allow",
+			"Action": [
+				"s3:CreateBucket",
+				"s3:PutObject",
+				"s3:GetObject",
+				"s3:DeleteObject",
+				"s3:DeleteBucket",
+				"s3:PutBucketPolicy",
+				"s3:PutLifecycleConfiguration",
+				"s3:GetBucketPolicy",
+				"s3:GetBucketLocation",
+				"s3:ListBucket",
+				"s3:PutBucketTagging",
+				"s3:PutEncryptionConfiguration",
+				"s3:DeleteBucketPolicy",
+				"s3:ListBucketVersions",
+				"s3:ListAllMyBuckets"
+			],
+			"Resource": "arn:aws:s3:::secret-santa-*"
+		},
+		{
+			"Effect": "Allow",
+			"Action": [
+				"lambda:CreateFunction",
+				"lambda:UpdateFunctionCode",
+				"lambda:UpdateFunctionConfiguration",
+				"lambda:DeleteFunction",
+				"lambda:InvokeFunction",
+				"lambda:GetFunction",
+				"lambda:AddPermission",
+				"lambda:RemovePermission",
+				"lambda:PublishVersion",
+				"lambda:TagResource",
+				"lambda:UntagResource",
+				"lambda:ListVersionsByFunction",
+				"lambda:ListTags"
+			],
+			"Resource": "*"
+		},
+		{
+			"Effect": "Allow",
+			"Action": [
+				"iam:PassRole",
+				"iam:GetRole",
+				"iam:CreateRole",
+				"iam:DeleteRole",
+				"iam:DeleteRolePolicy",
+				"iam:AttachRolePolicy",
+				"iam:DetachRolePolicy",
+				"iam:PutRolePolicy",
+				"iam:TagRole"
+			],
+			"Resource": "*"
+		},
+		{
+			"Effect": "Allow",
+			"Action": [
+				"apigateway:GET",
+				"apigateway:PUT",
+				"apigateway:POST",
+				"apigateway:DELETE",
+				"apigateway:PATCH"
+			],
+			"Resource": [
+				"arn:aws:apigateway:*::/restapis/*",
+				"arn:aws:apigateway:eu-west-1::/restapis",
+				"arn:aws:apigateway:eu-west-1::/tags/*"
+			]
+		},
+		{
+			"Effect": "Allow",
+			"Action": [
+				"logs:CreateLogGroup",
+				"logs:DeleteLogGroup",
+				"logs:CreateLogStream",
+				"logs:PutLogEvents",
+				"logs:DescribeLogStreams",
+				"logs:DescribeLogGroups", 
+				"logs:TagResource"
+			],
+			"Resource": "arn:aws:logs:*:*:*"
+		}
+	]
+}

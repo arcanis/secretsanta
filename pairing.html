@@ -140,6 +140,34 @@
 
         </script>
 
+        <script>
+        async function fetchPairing() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const token = urlParams.get('token');
+
+            if (!token) {
+                document.getElementById('pairing-details').innerText = "Invalid or missing token.";
+                return;
+            }
+
+            try {
+                const response = await fetch(`https://v9x9by1gyf.execute-api.eu-west-1.amazonaws.com/dev/pairing?token=${token}`);
+                const data = await response.json();
+
+                if (response.ok) {
+                    document.getElementById('pairing-name').innerText = data.giftee;
+                    document.getElementById('name').innerText = data.gifter;
+                } else {
+                    document.getElementById('pairing-details').innerText = data.error;
+                }
+            } catch (error) {
+                document.getElementById('pairing-details').innerText = "Error retrieving pairing information.";
+            }
+        }
+
+        fetchPairing();
+        </script>
+
     </head>
 
     <body>
