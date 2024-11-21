@@ -23,26 +23,21 @@ export function Accordion({ title, isOpen, onToggle, children, titleClassName = 
     }
   }, []);
 
-  return (
-    <div className="mb-4">
-      <button 
-        onClick={onToggle}
-        className="w-full text-left mb-2 flex justify-between items-center"
-      >
-        <h2 className={titleClassName}>{title}</h2>
-        <span className={`text-2xl transition-transform duration-300 ${isOpen ? 'rotate-180' : 'rotate-90'}`}>
-          ▶
-        </span>
-      </button>
-      
-      <div 
-        className={`transition-[height] duration-300 ease-in-out overflow-hidden`}
-        style={{ height: isOpen ? Math.min(contentHeight, 400) : 0 }}
-      >
-        <div ref={contentRef} className="overflow-y-auto max-h-[400px]">
-          {children}
-        </div>
+  return <>
+    <button 
+      onClick={onToggle}
+      className="w-full text-left mb-2 flex justify-between items-center"
+    >
+      <h2 className={titleClassName}>{title}</h2>
+      <span className={`text-2xl transition-transform duration-300 ${isOpen ? 'rotate-90' : 'rotate-180'}`}>
+        ▶
+      </span>
+    </button>
+
+    <div className={`${isOpen ? 'flex-1' : 'flex-0'} transition-[flex] duration-300 ease-in-out overflow-hidden`}>
+      <div ref={contentRef} className="overflow-y-auto max-h-[400px]">
+        {children}
       </div>
     </div>
-  );
+  </>;
 }

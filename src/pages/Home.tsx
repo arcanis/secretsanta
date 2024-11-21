@@ -4,16 +4,9 @@ import { RulesModal } from '../components/RulesModal';
 import { generatePairs } from '../utils/generatePairs';
 import { Accordion } from '../components/Accordion';
 import { AccordionContainer } from '../components/AccordionContainer';
-
-interface Rule {
-  type: 'must' | 'mustNot';
-  targetParticipant: string;
-}
-
-interface Participant {
-  name: string;
-  rules: Rule[];
-}
+import { ParticipantsList } from '../components/ParticipantsList';
+import { SecretSantaLinks } from '../components/SecretSantaLinks';
+import { Participant } from '../types';
 
 export function Home() {
   const [participants, setParticipants] = useState<Participant[]>(() => {
@@ -26,8 +19,6 @@ export function Home() {
     return saved ? JSON.parse(saved) : [];
   });
 
-  const [newName, setNewName] = useState('');
-
   const [selectedParticipant, setSelectedParticipant] = useState<string | null>(null);
   const [isRulesModalOpen, setIsRulesModalOpen] = useState(false);
   const [openSection, setOpenSection] = useState<'participants' | 'links'>('participants');
@@ -39,32 +30,6 @@ export function Home() {
   useEffect(() => {
     localStorage.setItem('secretSantaAssignments', JSON.stringify(assignments));
   }, [assignments]);
-
-  const addParticipant = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (newName.trim()) {
-      setParticipants([...participants, { name: newName.trim(), rules: [] }]);
-      setNewName('');
-    }
-  };
-
-  const updateParticipant = (index: number, name: string) => {
-    const newParticipants = [...participants];
-    newParticipants[index].name = name;
-    setParticipants(newParticipants);
-  };
-
-  const removeParticipant = (index: number) => {
-    setParticipants(participants.filter((_, i) => i !== index));
-  };
-
-  const updateRules = (participantName: string, newRules: Rule[]) => {
-    setParticipants(participants.map(p => 
-      p.name === participantName 
-        ? { ...p, rules: newRules }
-        : p
-    ));
-  };
 
   const handleGeneratePairs = () => {
     const pairs = generatePairs(participants);
@@ -117,66 +82,15 @@ export function Home() {
                 isOpen={openSection === 'participants'}
                 onToggle={() => setOpenSection('participants')}
               >
-                <div className="space-y-2 pr-2">
-                  {participants.map((participant, index) => (
-                    <div key={index} className="flex gap-2">
-                      <input
-                        type="text"
-                        value={participant.name}
-                        onChange={(e) => updateParticipant(index, e.target.value)}
-                        className="flex-1 min-w-0 p-2 border rounded text-sm sm:text-base"
-                      />
-                      <button
-                        onClick={() => {
-                          setSelectedParticipant(participant.name);
-                          setIsRulesModalOpen(true);
-                        }}
-                        className={`px-2 sm:px-3 py-2 rounded hover:opacity-80 transition-colors flex-shrink-0 ${
-                          participant.rules.length > 0 
-                            ? 'bg-yellow-500 text-white' 
-                            : 'bg-gray-200 text-gray-600'
-                        }`}
-                        title={participant.rules.length > 0 
-                          ? `${participant.rules.length} rule${participant.rules.length > 1 ? 's' : ''} set`
-                          : "Edit rules"
-                        }
-                      >
-                        {participant.rules.length > 0 ? '📝' : '📋'}
-                      </button>
-                      <button
-                        onClick={() => removeParticipant(index)}
-                        className="px-2 sm:px-3 py-2 bg-red-500 text-white rounded hover:bg-red-600 flex-shrink-0"
-                      >
-                        ×
-                      </button>
-                    </div>
-                  ))}
-
-                  <form onSubmit={addParticipant} className="mt-4">
-                    <input
-                      type="text"
-                      value={newName}
-                      onChange={(e) => setNewName(e.target.value)}
-                      className="w-full p-2 border rounded mb-2 text-sm sm:text-base"
-                      placeholder="Enter participant name"
-                    />
-                    <div className="grid grid-cols-2 gap-2">
-                      <button 
-                        type="submit"
-                        className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600 text-sm sm:text-base"
-                      >
-                        Add Person
-                      </button>
-                      <button 
-                        type="button"
-                        onClick={handleGeneratePairs}
-                        className="bg-green-500 text-white p-2 rounded hover:bg-green-600 text-sm sm:text-base"
-                      >
-                        Generate Pairs
-                      </button>
-                    </div>
-                  </form>
-                </div>
+                <ParticipantsList
+                  participants={participants}
+                  onChangeParticipants={setParticipants}
+                  onOpenRules={(name) => {
+                    setSelectedParticipant(name);
+                    setIsRulesModalOpen(true);
+                  }}
+                  onGeneratePairs={handleGeneratePairs}
+                />
               </Accordion>
 
               {assignments.length > 0 && (
@@ -185,28 +99,10 @@ export function Home() {
                   isOpen={openSection === 'links'}
                   onToggle={() => setOpenSection('links')}
                 >
-                  <div className="pr-2">
-                    <div className="p-4 bg-gray-50 rounded-lg">
-                      <p className="text-sm text-gray-600 mb-4">
-                        Share each link with the corresponding gift giver only
-                      </p>
-                      <div className="space-y-3">
-                        {assignments.map(([giver, receiver], index) => (
-                          <div key={index} className="flex gap-2 items-center">
-                            <span className="font-medium min-w-[80px] sm:min-w-[100px] text-sm sm:text-base">
-                              {giver}:
-                            </span>
-                            <button
-                              onClick={() => copyToClipboard(giver, receiver)}
-                              className="flex-1 p-2 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm sm:text-base"
-                            >
-                              Copy Secret Link
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
+                  <SecretSantaLinks
+                    assignments={assignments}
+                    onCopyLink={copyToClipboard}
+                  />
                 </Accordion>
               )}
 
@@ -215,12 +111,8 @@ export function Home() {
                   isOpen={isRulesModalOpen}
                   onClose={() => setIsRulesModalOpen(false)}
                   participant={selectedParticipant}
-                  allParticipants={participants.map(p => p.name)}
-                  rules={participants.find(p => p.name === selectedParticipant)?.rules || []}
-                  onSaveRules={(newRules) => {
-                    updateRules(selectedParticipant, newRules);
-                    setIsRulesModalOpen(false);
-                  }}
+                  participants={participants}
+                  onChangeParticipants={setParticipants}
                 />
               )}
             </AccordionContainer>

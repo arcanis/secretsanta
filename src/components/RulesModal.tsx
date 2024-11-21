@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { X, Plus } from "@phosphor-icons/react";
+import { Participant } from '../types';
 
 interface Rule {
   type: 'must' | 'mustNot';
@@ -9,13 +11,35 @@ interface RulesModalProps {
   isOpen: boolean;
   onClose: () => void;
   participant: string;
-  allParticipants: string[];
-  rules: Rule[];
-  onSaveRules: (rules: Rule[]) => void;
+  participants: Participant[];
+  onChangeParticipants: (newParticipants: Participant[]) => void;
 }
 
-export function RulesModal({ isOpen, onClose, participant, allParticipants, rules, onSaveRules }: RulesModalProps) {
-  const [localRules, setLocalRules] = useState<Rule[]>(rules);
+export function RulesModal({
+  isOpen,
+  onClose,
+  participant,
+  participants,
+  onChangeParticipants,
+}: RulesModalProps) {
+  const participantRules = participants.find(p => p.name === participant)?.rules || [];
+  const [localRules, setLocalRules] = useState<Rule[]>(participantRules);
+
+  // Add escape key handler
+  useEffect(() => {
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('keydown', handleEscape);
+      return () => {
+        document.removeEventListener('keydown', handleEscape);
+      };
+    }
+  }, [isOpen, onClose]);
 
   const addRule = (type: 'must' | 'mustNot') => {
     setLocalRules([...localRules, { type, targetParticipant: '' }]);
@@ -32,7 +56,13 @@ export function RulesModal({ isOpen, onClose, participant, allParticipants, rule
   };
 
   const handleSave = () => {
-    onSaveRules(localRules);
+    onChangeParticipants(
+      participants.map(p => 
+        p.name === participant 
+          ? { ...p, rules: localRules }
+          : p
+      )
+    );
     onClose();
   };
 
@@ -53,18 +83,19 @@ export function RulesModal({ isOpen, onClose, participant, allParticipants, rule
                 className="flex-1 p-2 border rounded"
               >
                 <option value="">Select participant</option>
-                {allParticipants
-                  .filter(p => p !== participant)
+                {participants
+                  .filter(p => p.name !== participant)
                   .map(p => (
-                    <option key={p} value={p}>{p}</option>
+                    <option key={p.name} value={p.name}>{p.name}</option>
                   ))
                 }
               </select>
               <button
                 onClick={() => removeRule(index)}
                 className="p-2 text-red-500 hover:text-red-700"
+                aria-label="Remove rule"
               >
-                ×
+                <X size={20} weight="bold" />
               </button>
             </div>
           ))}
@@ -73,14 +104,16 @@ export function RulesModal({ isOpen, onClose, participant, allParticipants, rule
         <div className="flex gap-2 mb-6">
           <button
             onClick={() => addRule('must')}
-            className="flex-1 bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
+            className="flex-1 bg-blue-500 text-white p-2 rounded hover:bg-blue-600 flex items-center justify-center gap-2"
           >
+            <Plus size={20} />
             Add Must Rule
           </button>
           <button
             onClick={() => addRule('mustNot')}
-            className="flex-1 bg-red-500 text-white p-2 rounded hover:bg-red-600"
+            className="flex-1 bg-red-500 text-white p-2 rounded hover:bg-red-600 flex items-center justify-center gap-2"
           >
+            <Plus size={20} />
             Add Must Not Rule
           </button>
         </div>

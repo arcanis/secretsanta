@@ -28,6 +28,10 @@
     );
 }
 
+.flex-0 {
+    flex: 0 1 0%;
+}
+
 .postcard > div {
     @apply bg-white;
 }
