@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { X, Plus } from "@phosphor-icons/react";
+import { X, Plus, Link, LinkBreak } from "@phosphor-icons/react";
 import { Participant } from '../types';
 
 interface Rule {
@@ -106,14 +106,14 @@ export function RulesModal({
             onClick={() => addRule('must')}
             className="flex-1 bg-blue-500 text-white p-2 rounded hover:bg-blue-600 flex items-center justify-center gap-2"
           >
-            <Plus size={20} />
+            <Link size={20} />
             Add Must Rule
           </button>
           <button
             onClick={() => addRule('mustNot')}
             className="flex-1 bg-red-500 text-white p-2 rounded hover:bg-red-600 flex items-center justify-center gap-2"
           >
-            <Plus size={20} />
+            <LinkBreak size={20} />
             Add Must Not Rule
           </button>
         </div>

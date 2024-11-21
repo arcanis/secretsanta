@@ -26,7 +26,7 @@ export function Accordion({ title, isOpen, onToggle, children, titleClassName = 
   return <>
     <button 
       onClick={onToggle}
-      className="w-full text-left mb-2 flex justify-between items-center"
+      className="w-full text-left mb-4 flex justify-between items-center"
     >
       <h2 className={titleClassName}>{title}</h2>
       <span className={`text-2xl transition-transform duration-300 ${isOpen ? 'rotate-90' : 'rotate-180'}`}>

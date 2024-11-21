@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { NotePencil, Note, X, Plus, ArrowsClockwise } from "@phosphor-icons/react";
+import { NotePencil, Note, X, Plus, ArrowsClockwise, UserSwitch } from "@phosphor-icons/react";
 import { Participant } from '../types';
 
 interface ParticipantsListProps {
@@ -62,10 +62,7 @@ export function ParticipantsList({
               : "Edit rules"
             }
           >
-            {participant.rules.length > 0 
-              ? <NotePencil size={20} weight="bold" />
-              : <Note size={20} weight="bold" />
-            }
+            <UserSwitch size={20} weight="bold" />
           </button>
           <button
             onClick={() => removeParticipant(index)}

@@ -7,6 +7,7 @@ import { AccordionContainer } from '../components/AccordionContainer';
 import { ParticipantsList } from '../components/ParticipantsList';
 import { SecretSantaLinks } from '../components/SecretSantaLinks';
 import { Participant } from '../types';
+import { Link } from 'react-router-dom';
 
 export function Home() {
   const [participants, setParticipants] = useState<Participant[]>(() => {
@@ -71,7 +72,8 @@ export function Home() {
             </p>
             <p className="text-sm sm:text-base hidden sm:block">
               Each person will be randomly assigned someone to give a gift to, ensuring everyone gives and
-              receives exactly one gift.
+              receives exactly one gift. You'll receive a link for each assignment, which you'll have to share
+              with the corresponding gift giver (via email, Slack, etc.) <Link className={`text-blue-500 underline`} to="/pairing?from=Simba&to=c1w%2FUV9lXC12U578BHPYZhXxhsK0fPTqoQDU9CA7W581P%2BM%3D">[Example]</Link>.
             </p>
           </div>
 
