@@ -1,0 +1,42 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.snow {
+    background: url(./static/snow.png), url(./static/snow.png), radial-gradient(#FB3B3B, #EF3D3D);
+    background-repeat: repeat, repeat, no-repeat;
+    animation-name: snow;
+    animation-duration: 5s;
+    animation-iteration-count: infinite;
+    animation-timing-function: linear;
+    font-family: 'Comic Sans MS';
+}
+
+.postcard {
+    @apply p-4;
+
+    background: repeating-linear-gradient(
+        45deg,
+        #5CC48A,
+        #5CC48A 30px,
+        #FFFFFF 30px,
+        #FFFFFF 60px,
+        #EF3D3D 60px,
+        #EF3D3D 90px,
+        #FFFFFF 90px,
+        #FFFFFF 120px
+    );
+}
+
+.postcard > div {
+    @apply bg-white;
+}
+
+@keyframes snow {
+  0% {
+    background-position: 130px 40px, 0 0, 0 0;
+  }
+  100% {
+    background-position: 130px 640px, 0 300px, 0 0
+  }
+}
