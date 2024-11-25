@@ -19,7 +19,7 @@ export function MenuItem({icon, to, onClick, children}: {icon: React.ReactNode, 
     </div>
   );
 
-  const className = `flex bg-white/80 rounded shadow px-2 py-1 text-sm cursor-pointer items-baseline`;
+  const className = `flex bg-white/80 rounded shadow px-2 py-1 cursor-pointer items-baseline`;
 
   const render = to
     ? <Link className={className} to={to}>{contents}</Link>

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { NotePencil, Note, X, Plus, ArrowsClockwise, UserSwitch } from "@phosphor-icons/react";
+import { NotePencil, Note, X, Plus, ArrowsClockwise, UserSwitch, Gear } from "@phosphor-icons/react";
 import { Participant } from '../types';
 import { useTranslation } from 'react-i18next';
 
@@ -50,7 +50,7 @@ export function ParticipantsList({
             type="text"
             value={participant.name}
             onChange={(e) => updateParticipant(index, e.target.value)}
-            className="flex-1 min-w-0 p-2 border rounded text-sm sm:text-base"
+            className="flex-1 min-w-0 p-2 border rounded"
             placeholder={t('participants.enterName')}
           />
           <button
@@ -65,14 +65,14 @@ export function ParticipantsList({
               : t('participants.editRules')
             }
           >
-            <UserSwitch size={20} weight="bold" />
+            <Gear className={`h-4`} weight="bold" />
           </button>
           <button
             onClick={() => removeParticipant(index)}
             className="px-2 sm:px-3 py-2 bg-red-500 text-white rounded hover:bg-red-600 flex-shrink-0"
             aria-label={t('participants.removeParticipant')}
           >
-            <X size={20} weight="bold" />
+            <X className={`h-4`} weight="bold" />
           </button>
         </div>
       ))}
@@ -82,13 +82,13 @@ export function ParticipantsList({
           type="text"
           value={newName}
           onChange={(e) => setNewName(e.target.value)}
-          className="w-full p-2 border rounded mb-2 text-sm sm:text-base"
+          className="w-full p-2 border rounded mb-2"
           placeholder={t('participants.enterName')}
         />
         <div className="grid grid-cols-2 gap-2">
           <button 
             type="submit"
-            className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600 text-sm sm:text-base flex items-center justify-center gap-2"
+            className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600 flex items-center justify-center gap-2"
           >
             <Plus size={20} weight="bold" />
             {t('participants.addPerson')}
@@ -96,7 +96,7 @@ export function ParticipantsList({
           <button 
             type="button"
             onClick={onGeneratePairs}
-            className="bg-green-500 text-white p-2 rounded hover:bg-green-600 text-sm sm:text-base flex items-center justify-center gap-2"
+            className="bg-green-500 text-white p-2 rounded hover:bg-green-600 flex items-center justify-center gap-2"
           >
             <ArrowsClockwise size={20} weight="bold" />
             {t('participants.generatePairs')}

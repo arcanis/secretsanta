@@ -13,18 +13,18 @@ export function SecretSantaLinks({ assignments, onCopyLink }: SecretSantaLinksPr
   return (
     <div className="pr-2">
       <div className="p-4 bg-gray-50 rounded-lg">
-        <p className="text-sm text-gray-600 mb-4">
+        <p className="text-gray-600 mb-4">
           {t('links.shareInstructions')}
         </p>
         <div className="grid grid-cols-[minmax(100px,auto)_1fr] gap-3">
           {assignments.map(([giver, receiver], index) => (
             <React.Fragment key={index}>
-              <span className="font-medium self-center text-sm sm:text-base">
+              <span className="font-medium self-center">
                 {giver}:
               </span>
               <button
                 onClick={() => onCopyLink(giver, receiver)}
-                className="p-2 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm sm:text-base flex items-center justify-center gap-2"
+                className="p-2 bg-blue-500 text-white rounded hover:bg-blue-600 flex items-center justify-center gap-2"
               >
                 <Copy size={20} weight="bold" />
                 {t('links.copySecretLink')}

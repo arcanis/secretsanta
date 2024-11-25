@@ -34,7 +34,7 @@ const resources = {
       participants: {
         title: "Participants",
         addPerson: "Add Person",
-        generatePairs: "Generate Pairs",
+        generatePairs: "Generate Pairings",
         enterName: "Enter participant name",
         editRules: "Edit rules",
         removeParticipant: "Remove participant",
@@ -45,10 +45,10 @@ const resources = {
         title: "Rules for {{name}}",
         mustBePairedWith: "Must be paired with",
         mustNotBePairedWith: "Must not be paired with",
-        selectParticipant: "Select participant",
+        selectParticipant: "Select another participant",
         removeRule: "Remove rule",
-        addMustRule: "Add Must Rule",
-        addMustNotRule: "Add Must Not Rule",
+        addMustRule: "Force a Pairing",
+        addMustNotRule: "Prevent a Pairing",
         cancel: "Cancel",
         saveRules: "Save Rules"
       },
@@ -83,8 +83,7 @@ const resources = {
       },
       pairing: {
         title: "Votre Partenaire de Secret Santa",
-        hello: "Bonjour",
-        assignedTo: "vous êtes assigné(e) pour offrir un cadeau à :",
+        assignment: "Bienvenue <name/>, vous avez été assigné(e) pour offrir un cadeau à :",
         loading: "Chargement...",
         error: "Échec du décryptage du message. Le lien pourrait être invalide.",
         startYourOwn: "Créez Votre Secret Santa !"
@@ -92,7 +91,7 @@ const resources = {
       participants: {
         title: "Participants",
         addPerson: "Ajouter une Personne",
-        generatePairs: "Générer les Paires",
+        generatePairs: "Générer les Associations",
         enterName: "Entrez le nom du participant",
         editRules: "Modifier les règles",
         removeParticipant: "Supprimer le participant",
@@ -103,10 +102,10 @@ const resources = {
         title: "Règles pour {{name}}",
         mustBePairedWith: "Doit être associé avec",
         mustNotBePairedWith: "Ne doit pas être associé avec",
-        selectParticipant: "Sélectionnez un participant",
+        selectParticipant: "Sélectionnez un autre participant",
         removeRule: "Supprimer la règle",
-        addMustRule: "Ajouter un Preset",
-        addMustNotRule: "Ajouter une Exclusion",
+        addMustRule: "Forcer une association",
+        addMustNotRule: "Exclure une association",
         cancel: "Annuler",
         saveRules: "Enregistrer les Règles"
       },

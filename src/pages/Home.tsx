@@ -68,7 +68,7 @@ export function Home() {
 
   return (
     <PageTransition>
-      <div className="min-h-screen flex items-center justify-center p-4 sm:p-6 md:p-12">
+      <div className="min-h-screen flex items-center justify-center pt-28 p-4 sm:p-6 md:p-12">
         <SideMenu />
         <div className="container mx-auto max-w-5xl">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
@@ -78,7 +78,7 @@ export function Home() {
                   <h1 className="text-xl sm:text-2xl font-bold mb-4 text-red-700">
                     {t('home.title')}
                   </h1>
-                  <div className="space-y-4 text-sm sm:text-base text-gray-600">
+                  <div className="space-y-4 text-gray-600">
                     <p>
                       {t('home.welcome')}
                     </p>

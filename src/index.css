@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 body {
-  background: url(./static/snow.png), url(./static/snow.png), #fefae8 url(./static/cats.png) bottom left no-repeat;
+  background: url(../static/snow.png), url(../static/snow.png), #fefae8 url(../static/cats.png) bottom left no-repeat;
   background-repeat: repeat, repeat, no-repeat;
   background-size: auto auto, auto auto, auto 100%;
   animation-name: snow;

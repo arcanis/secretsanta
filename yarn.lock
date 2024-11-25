@@ -10,12 +10,14 @@ __metadata:
   resolution: ".cursor-tutor@workspace:."
   dependencies:
     "@phosphor-icons/react": "npm:^2.1.7"
+    "@types/crypto-js": "npm:^3"
     "@types/react": "npm:^18.3.12"
     "@types/react-dom": "npm:^18.3.1"
     "@types/react-world-flags": "npm:^1"
     "@vitejs/plugin-react": "npm:^4.3.3"
     autoprefixer: "npm:^10.4.20"
     country-flag-icons: "npm:^1.5.13"
+    crypto-js: "npm:3.1.2"
     framer-motion: "npm:^11.11.17"
     i18next: "npm:^24.0.2"
     i18next-browser-languagedetector: "npm:^8.0.0"
@@ -718,6 +720,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/crypto-js@npm:^3":
+  version: 3.1.47
+  resolution: "@types/crypto-js@npm:3.1.47"
+  checksum: 10c0/372c3f266d01b4bda2255d83bde099d6965edb1c8cc59de0c815fe1d19a4bc0c403f6f26db76de5caa7bde8d1464a541e81eb275c8ed7604d96d4b27397ea165
+  languageName: node
+  linkType: hard
+
 "@types/estree@npm:1.0.6":
   version: 1.0.6
   resolution: "@types/estree@npm:1.0.6"
@@ -1045,6 +1054,13 @@ __metadata:
     shebang-command: "npm:^2.0.0"
     which: "npm:^2.0.1"
   checksum: 10c0/053ea8b2135caff68a9e81470e845613e374e7309a47731e81639de3eaeb90c3d01af0e0b44d2ab9d50b43467223b88567dfeb3262db942dc063b9976718ffc1
+  languageName: node
+  linkType: hard
+
+"crypto-js@npm:3.1.2":
+  version: 3.1.2
+  resolution: "crypto-js@npm:3.1.2"
+  checksum: 10c0/af8dec3aebbb588bf46e11cb67b07635fcae2332e63414d672c7f2025e97576f582dbead055abf25b969c07f44fc0e1f81d437d42519f2fe9e9e4e40f75de120
   languageName: node
   linkType: hard
 

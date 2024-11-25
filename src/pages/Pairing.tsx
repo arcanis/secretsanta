@@ -3,30 +3,44 @@ import { useSearchParams, Link } from 'react-router-dom';
 import { decryptText } from '../utils/crypto';
 import { PostCard } from '../components/PostCard';
 import { Ribbon } from '../components/Ribbon';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import { MenuItem, SideMenu } from '../components/SideMenu';
 import { PageTransition } from '../components/PageTransition';
 import { ArrowLeft } from '@phosphor-icons/react';
+import { motion } from 'framer-motion';
+import CryptoJS from 'crypto-js';
+
+async function loadPairing(searchParams: URLSearchParams): Promise<[string, string]> {
+  // Legacy pairings, not generated anymore; remove after 2025-01-01
+  if (searchParams.has(`name`) && searchParams.has(`key`) && searchParams.has(`pairing`)) {
+    const name = searchParams.get(`name`)!;
+    const key = searchParams.get(`key`)!;
+    const pairing = searchParams.get(`pairing`)!;
+
+    return [name, CryptoJS.AES.decrypt(pairing, key).toString(CryptoJS.enc.Utf8)];
+  }
+
+  if (searchParams.has(`to`)) {
+    const from = searchParams.get('from')!;
+    const to = searchParams.get('to')!;
+
+    return [from, await decryptText(to)];
+  }
+
+  throw new Error(`Missing key or to parameter in search params`);
+}
 
 export function Pairing() {
   const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [receiver, setReceiver] = useState<string | null>(null);
+  const [receiver, setReceiver] = useState<[string, string] | null>(null);
 
   useEffect(() => {
     const decryptReceiver = async () => {
       try {
-        const from = searchParams.get('from');
-        const encryptedTo = searchParams.get('to');
-        
-        if (!from || !encryptedTo) {
-          throw new Error('Missing parameters');
-        }
-
-        const decoded = await decryptText(encryptedTo);
-        setReceiver(decoded);
+        setReceiver(await loadPairing(searchParams));
       } catch (err) {
         console.error('Decryption error:', err);
         setError(t('pairing.error'));
@@ -37,14 +51,6 @@ export function Pairing() {
 
     decryptReceiver();
   }, [searchParams, t]);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-red-700 flex items-center justify-center">
-        <div className="text-xl text-white">{t('pairing.loading')}</div>
-      </div>
-    );
-  }
 
   if (error) {
     return (
@@ -62,17 +68,31 @@ export function Pairing() {
         </MenuItem>
       </SideMenu>
 
-      <PostCard>
-        <h1 className="text-3xl font-bold mb-6 text-center text-red-700">
-          {t('pairing.title')}
-        </h1>
-        <p className="mb-6 text-center text-gray-600">
-          {t('pairing.hello')} <span className="font-semibold">{searchParams.get('from')}</span>, {t('pairing.assignedTo')}
-        </p>
-        <div className="text-2xl font-bold text-center p-6 bg-green-100 rounded-lg border-4 border-green-200">
-          {receiver}
-        </div>
-      </PostCard>
+      {!loading && (
+        <motion.div
+          initial={{ rotateZ: -360 * 1, scale: 0 }}
+          animate={{ rotateZ: 0, scale: 1, opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ ease: `easeIn`, duration: .6 }}
+        >
+          <PostCard>
+            <h1 className="text-3xl font-bold mb-6 text-center text-red-700">
+              {t('pairing.title')}
+            </h1>
+            <p className="mb-6 text-center text-gray-600">
+              <Trans
+                i18nKey="pairing.assignment"
+                components={{
+                  name: <span className="font-semibold">{receiver![0]}</span>
+                }}
+              />
+            </p>
+            <div className="text-2xl font-bold text-center p-6 bg-green-100 rounded-lg border-4 border-green-200">
+              {receiver![1]}
+            </div>
+          </PostCard>
+        </motion.div>
+      )}
     </div>
   );
 } 
