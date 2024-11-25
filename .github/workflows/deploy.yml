@@ -36,7 +36,7 @@ jobs:
         run: corepack enable && yarn
 
       - name: Build
-        run: yarn build
+        run: yarn vite build
         env:
           VITE_BASE_URL: '/${{ github.event.repository.name }}'
 
