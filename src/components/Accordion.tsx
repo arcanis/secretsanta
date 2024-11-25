@@ -26,7 +26,7 @@ export function Accordion({ title, isOpen, onToggle, children, titleClassName = 
   return <>
     <button 
       onClick={onToggle}
-      className="w-full text-left mb-4 flex justify-between items-center"
+      className="w-full text-left mb-2 flex justify-between items-center"
     >
       <h2 className={titleClassName}>{title}</h2>
       <span className={`text-2xl transition-transform duration-300 ${isOpen ? 'rotate-90' : 'rotate-180'}`}>
@@ -35,7 +35,8 @@ export function Accordion({ title, isOpen, onToggle, children, titleClassName = 
     </button>
 
     <div className={`${isOpen ? 'flex-1' : 'flex-0'} transition-[flex] duration-300 ease-in-out overflow-hidden`}>
-      <div ref={contentRef} className="overflow-y-auto max-h-[400px]">
+      <div className="mb-2 bg-postcard h-1 rounded" />
+      <div ref={contentRef} className="overflow-y-auto max-h-[400px] py-2">
         {children}
       </div>
     </div>

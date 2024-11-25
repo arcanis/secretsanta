@@ -8,6 +8,7 @@ import { ParticipantsList } from '../components/ParticipantsList';
 import { SecretSantaLinks } from '../components/SecretSantaLinks';
 import { Participant } from '../types';
 import { Link } from 'react-router-dom';
+import { PostCard } from '../components/PostCard';
 
 export function Home() {
   const [participants, setParticipants] = useState<Participant[]>(() => {
@@ -61,20 +62,32 @@ export function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4 sm:p-6 md:p-12">
+    <div className="min-h-screen flex items-center justify-center p-4 sm:p-6 md:p-12">
       <div className="container mx-auto max-w-5xl">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
-          <div className="prose lg:prose-xl order-1 lg:order-none text-center lg:text-left">
-            <h1 className="text-2xl sm:text-3xl font-bold mb-4">Secret Santa Organizer</h1>
-            <p className="mb-4 text-sm sm:text-base">
-              Welcome to the Secret Santa organizer! This tool helps you arrange your holiday gift exchange.
-              Simply add all participants, and we'll help you randomly assign gift-giving pairs.
-            </p>
-            <p className="text-sm sm:text-base hidden sm:block">
-              Each person will be randomly assigned someone to give a gift to, ensuring everyone gives and
-              receives exactly one gift. You'll receive a link for each assignment, which you'll have to share
-              with the corresponding gift giver (via email, Slack, etc.) <Link className={`text-blue-500 underline`} to="/pairing?from=Simba&to=c1w%2FUV9lXC12U578BHPYZhXxhsK0fPTqoQDU9CA7W581P%2BM%3D">[Example]</Link>.
-            </p>
+          <div>
+            <PostCard>
+              <div className="space-y-4">
+                <h1 className="text-2xl sm:text-3xl font-bold mb-4 text-red-700">
+                  Secret Santa Organizer
+                </h1>
+                <div className="space-y-4 text-sm sm:text-base text-gray-600">
+                  <p>
+                    Welcome! This tool helps you arrange your holiday gift exchange.
+                    Simply add all participants, and we'll help you randomly assign gift-giving pairs.
+                  </p>
+                  <p>
+                    No accounts, no emails, no hassle, all hosted on GitHub Pages with no backend!
+                  </p>
+                  <p>
+                    Each person will be randomly assigned someone to give a
+                    gift to. You'll receive a unique link for each participant,
+                    which you'll have to share however you want (via email,
+                    Slack, etc.) <Link className="text-blue-500 underline" to="/pairing?from=Simba&to=c1w%2FUV9lXC12U578BHPYZhXxhsK0fPTqoQDU9CA7W581P%2BM%3D">[Example link]</Link>.
+                  </p>
+                </div>
+              </div>
+            </PostCard>
           </div>
 
           <div className="order-2 lg:order-none w-full">
