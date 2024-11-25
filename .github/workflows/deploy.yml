@@ -33,7 +33,7 @@ jobs:
           node-version: '20'
 
       - name: Install Dependencies
-        run: yarn
+        run: corepack enable && yarn
 
       - name: Build
         run: yarn build
