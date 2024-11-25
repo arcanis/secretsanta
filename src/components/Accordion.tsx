@@ -1,3 +1,4 @@
+import { CaretRight } from '@phosphor-icons/react';
 import { useRef, useEffect, useState } from 'react';
 
 interface AccordionProps {
@@ -26,17 +27,18 @@ export function Accordion({ title, isOpen, onToggle, children, titleClassName = 
   return <>
     <button 
       onClick={onToggle}
-      className="w-full text-left mb-2 flex justify-between items-center"
+      className="w-full p-1 text-left mb-2 bg-postcard-nowhite rounded-lg"
     >
-      <h2 className={titleClassName}>{title}</h2>
-      <span className={`text-2xl transition-transform duration-300 ${isOpen ? 'rotate-90' : 'rotate-180'}`}>
-        ▶
-      </span>
+      <div className="flex px-4 py-2 items-center justify-between text-white rounded">
+        <h2 className={titleClassName}>{title}</h2>
+        <span className={`text-2xl transition-transform duration-300 ${isOpen ? 'rotate-90' : 'rotate-180'}`}>
+          <CaretRight/>
+        </span>
+      </div>
     </button>
 
-    <div className={`${isOpen ? 'flex-1' : 'flex-0'} transition-[flex] duration-300 ease-in-out overflow-hidden`}>
-      <div className="mb-2 bg-postcard h-1 rounded" />
-      <div ref={contentRef} className="overflow-y-auto max-h-[400px] py-2">
+    <div className={`${isOpen ? 'flex-1' : 'flex-0'} transition-[flex] h-0 duration-300 ease-in-out overflow-scroll`}>
+      <div className={`pb-2`}>
         {children}
       </div>
     </div>

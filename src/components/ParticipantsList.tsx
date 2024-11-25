@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { NotePencil, Note, X, Plus, ArrowsClockwise, UserSwitch } from "@phosphor-icons/react";
 import { Participant } from '../types';
+import { useTranslation } from 'react-i18next';
 
 interface ParticipantsListProps {
   participants: Participant[];
@@ -16,6 +17,7 @@ export function ParticipantsList({
   onGeneratePairs,
 }: ParticipantsListProps) {
   const [newName, setNewName] = useState('');
+  const { t } = useTranslation();
 
   const addParticipant = (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,7 +43,7 @@ export function ParticipantsList({
   };
 
   return (
-    <div className="space-y-2 pr-2">
+    <div className="space-y-2 pr-2 space-y-2">
       {participants.map((participant, index) => (
         <div key={index} className="flex gap-2">
           <input
@@ -49,6 +51,7 @@ export function ParticipantsList({
             value={participant.name}
             onChange={(e) => updateParticipant(index, e.target.value)}
             className="flex-1 min-w-0 p-2 border rounded text-sm sm:text-base"
+            placeholder={t('participants.enterName')}
           />
           <button
             onClick={() => onOpenRules(participant.name)}
@@ -58,8 +61,8 @@ export function ParticipantsList({
                 : 'bg-gray-200 text-gray-600'
             }`}
             title={participant.rules.length > 0 
-              ? `${participant.rules.length} rule${participant.rules.length > 1 ? 's' : ''} set`
-              : "Edit rules"
+              ? t('participants.rulesCount', { count: participant.rules.length })
+              : t('participants.editRules')
             }
           >
             <UserSwitch size={20} weight="bold" />
@@ -67,20 +70,20 @@ export function ParticipantsList({
           <button
             onClick={() => removeParticipant(index)}
             className="px-2 sm:px-3 py-2 bg-red-500 text-white rounded hover:bg-red-600 flex-shrink-0"
-            aria-label="Remove participant"
+            aria-label={t('participants.removeParticipant')}
           >
             <X size={20} weight="bold" />
           </button>
         </div>
       ))}
 
-      <form onSubmit={addParticipant} className="mt-4">
+      <form onSubmit={addParticipant}>
         <input
           type="text"
           value={newName}
           onChange={(e) => setNewName(e.target.value)}
           className="w-full p-2 border rounded mb-2 text-sm sm:text-base"
-          placeholder="Enter participant name"
+          placeholder={t('participants.enterName')}
         />
         <div className="grid grid-cols-2 gap-2">
           <button 
@@ -88,7 +91,7 @@ export function ParticipantsList({
             className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600 text-sm sm:text-base flex items-center justify-center gap-2"
           >
             <Plus size={20} weight="bold" />
-            Add Person
+            {t('participants.addPerson')}
           </button>
           <button 
             type="button"
@@ -96,7 +99,7 @@ export function ParticipantsList({
             className="bg-green-500 text-white p-2 rounded hover:bg-green-600 text-sm sm:text-base flex items-center justify-center gap-2"
           >
             <ArrowsClockwise size={20} weight="bold" />
-            Generate Pairs
+            {t('participants.generatePairs')}
           </button>
         </div>
       </form>

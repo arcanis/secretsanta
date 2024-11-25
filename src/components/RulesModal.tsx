@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { X, Plus, Link, LinkBreak } from "@phosphor-icons/react";
 import { Participant } from '../types';
+import { useTranslation } from 'react-i18next';
 
 interface Rule {
   type: 'must' | 'mustNot';
@@ -22,6 +23,7 @@ export function RulesModal({
   participants,
   onChangeParticipants,
 }: RulesModalProps) {
+  const { t } = useTranslation();
   const participantRules = participants.find(p => p.name === participant)?.rules || [];
   const [localRules, setLocalRules] = useState<Rule[]>(participantRules);
 
@@ -71,18 +73,25 @@ export function RulesModal({
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 max-w-md w-full">
-        <h2 className="text-xl font-bold mb-4">Rules for {participant}</h2>
+        <h2 className="text-xl font-bold mb-4">
+          {t('rules.title', { name: participant })}
+        </h2>
         
         <div className="space-y-4 mb-6">
           {localRules.map((rule, index) => (
             <div key={index} className="flex gap-2 items-center">
-              <span>{rule.type === 'must' ? 'Must be paired with' : 'Must not be paired with'}</span>
+              <span>
+                {rule.type === 'must' 
+                  ? t('rules.mustBePairedWith')
+                  : t('rules.mustNotBePairedWith')
+                }
+              </span>
               <select
                 value={rule.targetParticipant}
                 onChange={(e) => updateRule(index, e.target.value)}
                 className="flex-1 p-2 border rounded"
               >
-                <option value="">Select participant</option>
+                <option value="">{t('rules.selectParticipant')}</option>
                 {participants
                   .filter(p => p.name !== participant)
                   .map(p => (
@@ -93,7 +102,7 @@ export function RulesModal({
               <button
                 onClick={() => removeRule(index)}
                 className="p-2 text-red-500 hover:text-red-700"
-                aria-label="Remove rule"
+                aria-label={t('rules.removeRule')}
               >
                 <X size={20} weight="bold" />
               </button>
@@ -107,14 +116,14 @@ export function RulesModal({
             className="flex-1 bg-blue-500 text-white p-2 rounded hover:bg-blue-600 flex items-center justify-center gap-2"
           >
             <Link size={20} />
-            Add Must Rule
+            {t('rules.addMustRule')}
           </button>
           <button
             onClick={() => addRule('mustNot')}
             className="flex-1 bg-red-500 text-white p-2 rounded hover:bg-red-600 flex items-center justify-center gap-2"
           >
             <LinkBreak size={20} />
-            Add Must Not Rule
+            {t('rules.addMustNotRule')}
           </button>
         </div>
 
@@ -123,13 +132,13 @@ export function RulesModal({
             onClick={onClose}
             className="px-4 py-2 text-gray-600 hover:text-gray-800"
           >
-            Cancel
+            {t('rules.cancel')}
           </button>
           <button
             onClick={handleSave}
             className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
           >
-            Save Rules
+            {t('rules.saveRules')}
           </button>
         </div>
       </div>

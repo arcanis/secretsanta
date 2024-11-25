@@ -7,12 +7,21 @@
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react": "^4.3.3",
     "autoprefixer": "^10.4.20",
+    "country-flag-icons": "^1.5.13",
+    "framer-motion": "^11.11.17",
+    "i18next": "^24.0.2",
+    "i18next-browser-languagedetector": "^8.0.0",
     "postcss": "^8.4.49",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-i18next": "^15.1.1",
     "react-router-dom": "^6.28.0",
+    "react-world-flags": "^1.6.0",
     "tailwindcss": "^3.4.15",
     "typescript": "^5.6.3",
     "vite": "^5.4.11"
+  },
+  "devDependencies": {
+    "@types/react-world-flags": "^1"
   }
 }

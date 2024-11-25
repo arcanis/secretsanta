@@ -1,4 +1,5 @@
 import './index.css';
+import './i18n/config';
 import { createRoot } from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { Home } from './pages/Home';

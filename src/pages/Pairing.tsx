@@ -3,8 +3,13 @@ import { useSearchParams, Link } from 'react-router-dom';
 import { decryptText } from '../utils/crypto';
 import { PostCard } from '../components/PostCard';
 import { Ribbon } from '../components/Ribbon';
+import { useTranslation } from 'react-i18next';
+import { MenuItem, SideMenu } from '../components/SideMenu';
+import { PageTransition } from '../components/PageTransition';
+import { ArrowLeft } from '@phosphor-icons/react';
 
 export function Pairing() {
+  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -24,19 +29,19 @@ export function Pairing() {
         setReceiver(decoded);
       } catch (err) {
         console.error('Decryption error:', err);
-        setError('Failed to decrypt the message. The link might be invalid.');
+        setError(t('pairing.error'));
       } finally {
         setLoading(false);
       }
     };
 
     decryptReceiver();
-  }, [searchParams]);
+  }, [searchParams, t]);
 
   if (loading) {
     return (
       <div className="min-h-screen bg-red-700 flex items-center justify-center">
-        <div className="text-xl text-white">Loading...</div>
+        <div className="text-xl text-white">{t('pairing.loading')}</div>
       </div>
     );
   }
@@ -51,14 +56,18 @@ export function Pairing() {
 
   return (
     <div className="min-h-screen snow flex flex-col items-center justify-center py-12 px-4 relative overflow-hidden">
-      <Ribbon href="/">Create Your Secret Santa</Ribbon>
+      <SideMenu>
+        <MenuItem to="/" icon={<ArrowLeft/>}>
+          {t('pairing.startYourOwn')}
+        </MenuItem>
+      </SideMenu>
 
       <PostCard>
         <h1 className="text-3xl font-bold mb-6 text-center text-red-700">
-          Your Secret Santa Assignment
+          {t('pairing.title')}
         </h1>
         <p className="mb-6 text-center text-gray-600">
-          Hello <span className="font-semibold">{searchParams.get('from')}</span>, you are assigned to get a gift for:
+          {t('pairing.hello')} <span className="font-semibold">{searchParams.get('from')}</span>, {t('pairing.assignedTo')}
         </p>
         <div className="text-2xl font-bold text-center p-6 bg-green-100 rounded-lg border-4 border-green-200">
           {receiver}
