@@ -10,8 +10,9 @@ import { Participant } from '../types';
 import { Link } from 'react-router-dom';
 import { PostCard } from '../components/PostCard';
 import { Trans, useTranslation } from 'react-i18next';
-import { SideMenu } from '../components/SideMenu';
+import { MenuItem, SideMenu } from '../components/SideMenu';
 import { PageTransition } from '../components/PageTransition';
+import { Heart } from '@phosphor-icons/react';
 
 export function Home() {
   const { t } = useTranslation();
@@ -69,7 +70,12 @@ export function Home() {
   return (
     <PageTransition>
       <div className="min-h-screen flex items-center justify-center pt-28 p-4 sm:p-6 md:p-12">
-        <SideMenu />
+        <SideMenu>
+          <MenuItem to="https://bsky.app/profile/mael.dev" icon={<Heart className={`text-red-700`} weight={`fill`}/>}>
+            Project started in 2015 by Maël
+          </MenuItem>
+        </SideMenu>
+
         <div className="container mx-auto max-w-5xl">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
             <div>

@@ -13,13 +13,13 @@ function Flag({className, code}: {className?: string, code: string}) {
 
 export function MenuItem({icon, to, onClick, children}: {icon: React.ReactNode, to?: string, onClick?: () => void, children: React.ReactNode}) {
   const contents = (
-    <div className="flex items-center">
+    <div className="flex items-center select-none">
       <div className={`w-6 mr-2 text-center`}>{icon}</div>
       <div>{children}</div>
     </div>
   );
 
-  const className = `flex bg-white/80 rounded shadow px-2 py-1 cursor-pointer items-baseline`;
+  const className = `flex bg-white/60 hover:bg-white rounded shadow px-2 py-1 cursor-pointer items-baseline`;
 
   const render = to
     ? <Link className={className} to={to}>{contents}</Link>
