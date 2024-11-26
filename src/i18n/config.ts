@@ -25,8 +25,7 @@ const resources = {
       },
       pairing: {
         title: "Your Secret Santa Assignment",
-        hello: "Hello",
-        assignedTo: "you are assigned to get a gift for:",
+        assignment: "Hello <name/>, you have been assigned to get a gift for:",
         loading: "Loading...",
         error: "Failed to decrypt the message. The link might be invalid.",
         startYourOwn: "Start a Secret Santa!"
