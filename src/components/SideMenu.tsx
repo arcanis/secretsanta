@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { SUPPORTED_LANGUAGES } from '../i18n/config';
-import Flags from 'country-flag-icons/react/3x2';
+import * as Flags from 'country-flag-icons/react/3x2';
 import { Link } from 'react-router-dom';
 
 function Flag({className, code}: {className?: string, code: string}) {

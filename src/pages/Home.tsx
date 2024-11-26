@@ -52,7 +52,7 @@ export function Home() {
   };
 
   const getAssignmentLink = async (giver: string, receiver: string) => {
-    const baseUrl = window.location.origin;
+    const baseUrl = `${window.location.origin}${window.location.pathname.replace(/\/[^/]*$/, '')}`;
     const encryptedReceiver = await encryptText(receiver);
     return `${baseUrl}/pairing?from=${encodeURIComponent(giver)}&to=${encodeURIComponent(encryptedReceiver)}`;
   };

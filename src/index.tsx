@@ -17,20 +17,19 @@ function Redirect({ to }: { to: string }) {
   return null;
 }
 
-const router = createBrowserRouter([
-  {
-    path: "/",
-    element: <Home />,
-  },
-  {
-    path: "/pairing",
-    element: <Pairing />,
-  },
-  {
-    path: "/pairing.html",
-    element: <Redirect to="/pairing" />
-  }
-]);
+const router = createBrowserRouter([{
+  path: "/",
+  element: <Home />,
+}, {
+  path: "/pairing",
+  element: <Pairing />,
+}, {
+  path: "/pairing.html",
+  element: <Redirect to="/pairing" />
+}], {
+  // @ts-ignore
+  basename: import.meta.env.BASE_URL,
+});
 
 const root = createRoot(document.getElementById("root")!);
 root.render(
