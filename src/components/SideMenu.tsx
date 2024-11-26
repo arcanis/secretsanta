@@ -32,7 +32,7 @@ export function SideMenu({children}: {children?: React.ReactNode}) {
   const { i18n, t } = useTranslation();
 
   return (
-    <div className="fixed top-4 left-4 z-50 flex flex-col items-start space-y-2">
+    <div className="absolute top-4 left-4 z-50 flex flex-col items-start space-y-2">
       {children}
       {SUPPORTED_LANGUAGES.map((language) => (
         <MenuItem key={language} icon={<Flag className={`h-3`} code={language} />} onClick={() => i18n.changeLanguage(language)}>
