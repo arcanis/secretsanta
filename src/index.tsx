@@ -1,5 +1,6 @@
 import './index.css';
 import './i18n/config';
+import '@fontsource/cherry-swash';
 import { createRoot } from "react-dom/client";
 import { createBrowserRouter, RouterProvider, useNavigate, useSearchParams } from "react-router-dom";
 import { Home } from './pages/Home';

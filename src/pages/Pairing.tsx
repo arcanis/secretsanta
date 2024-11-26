@@ -1,3 +1,4 @@
+import "@fontsource/dancing-script";
 import { useEffect, useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { decryptText } from '../utils/crypto';
@@ -87,7 +88,7 @@ export function Pairing() {
                 }}
               />
             </p>
-            <div className="text-2xl font-bold text-center p-6 bg-green-100 rounded-lg border-4 border-green-200">
+            <div className="text-8xl font-bold text-center p-6 font-dancing-script">
               {receiver![1]}
             </div>
           </PostCard>
