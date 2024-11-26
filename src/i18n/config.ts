@@ -10,7 +10,7 @@ const resources = {
         name: "English",
       },
       home: {
-        title: "Secret Santa Organizer",
+        title: "Secret Santa Planner",
         welcome: "Welcome! This tool helps you arrange your holiday gift exchange. Simply add all participants, and we'll help you randomly assign gift-giving pairs.",
         noBackend: "No accounts, no emails, no hassle, all hosted on <githubLink>GitHub Pages</githubLink> with no backend!",
         explanation: "Each person will be randomly assigned someone to give a gift to. You'll receive a unique link for each participant, which you'll have to share however you want (via email, Slack, etc.). [<exampleLink>Example link</exampleLink>]",
