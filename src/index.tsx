@@ -7,7 +7,7 @@ import { Pairing } from './pages/Pairing';
 import { useEffect } from 'react';
 
 function Redirect({ to }: { to: string }) {
-  const searchParams = useSearchParams();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
   useEffect(() => {
