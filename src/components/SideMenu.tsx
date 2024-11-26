@@ -22,7 +22,9 @@ export function MenuItem({icon, to, onClick, children}: {icon: React.ReactNode, 
   const className = `flex bg-white/60 hover:bg-white rounded shadow px-2 py-1 cursor-pointer items-baseline`;
 
   const render = to
-    ? <Link className={className} to={to}>{contents}</Link>
+    ? to.startsWith(`https://`)
+      ? <a className={className} href={to} target={`_blank`}>{contents}</a>
+      : <Link className={className} to={to}>{contents}</Link>
     : <div className={className} onClick={onClick}>{contents}</div>;
 
   return render;
@@ -32,7 +34,7 @@ export function SideMenu({children}: {children?: React.ReactNode}) {
   const { i18n, t } = useTranslation();
 
   return (
-    <div className="absolute top-4 left-4 z-50 flex flex-col items-start space-y-2">
+    <div className="lg:absolute top-4 left-4 z-50 flex flex-col items-start space-y-2">
       {children}
       {SUPPORTED_LANGUAGES.map((language) => (
         <MenuItem key={language} icon={<Flag className={`h-3`} code={language} />} onClick={() => i18n.changeLanguage(language)}>

@@ -1,159 +1,190 @@
-import { useState, useEffect } from 'react';
-import { encryptText } from '../utils/crypto';
+import { useState } from 'react';
 import { RulesModal } from '../components/RulesModal';
-import { generatePairs } from '../utils/generatePairs';
+import { GeneratedPairs, generatePairs } from '../utils/generatePairs';
 import { Accordion } from '../components/Accordion';
 import { AccordionContainer } from '../components/AccordionContainer';
 import { ParticipantsList } from '../components/ParticipantsList';
 import { SecretSantaLinks } from '../components/SecretSantaLinks';
-import { Participant } from '../types';
+import { Participant, Rule } from '../types';
 import { Link } from 'react-router-dom';
 import { PostCard } from '../components/PostCard';
 import { Trans, useTranslation } from 'react-i18next';
 import { MenuItem, SideMenu } from '../components/SideMenu';
 import { PageTransition } from '../components/PageTransition';
 import { Heart } from '@phosphor-icons/react';
+import { Settings } from '../components/Settings';
+import { useLocalStorage } from '../hooks/useLocalStorage';
+import { Layout } from '../components/Layout';
+
+function migrateParticipants(value: any) {
+  // The first release of the new tool used an array of participants.
+  if (Array.isArray(value)) {
+    const migrated: Record<string, Participant> = {};
+    const ids = new Map<string, string>();
+
+    for (const participant of value) {
+      const id = crypto.randomUUID();
+      ids.set(participant.name, id);
+    }
+
+    for (const participant of value) {
+      const id = ids.get(participant.name)!;
+
+      migrated[id] = {
+        id,
+        name: participant.name,
+        rules: participant.rules.map(({type, targetParticipant}: {type: string, targetParticipant: string}) => {
+          const targetParticipantId = ids.get(targetParticipant);
+          return targetParticipantId ? {type, targetParticipantId} : null;
+        }).filter((rule: any): rule is Rule => {
+          return !!rule;
+        }),
+      };
+
+      console.log(migrated);
+    }
+
+    return migrated;
+  }
+
+  return value;
+}
+
+function migrateAssignments(value: any) {
+  if (Array.isArray(value)) {
+    if (value.length === 0) {
+      return null;
+    }
+
+    console.log({
+      hash: ``,
+      pairings: value.map(([giver, receiver]) => ({
+        giver: {id: ``, name: giver},
+        receiver: {id: ``, name: receiver},
+      })),
+    });
+
+    return {
+      hash: ``,
+      pairings: value.map(([giver, receiver]) => ({
+        giver: {id: ``, name: giver},
+        receiver: {id: ``, name: receiver},
+      })),
+    };
+  }
+
+  return value;
+}
 
 export function Home() {
   const { t } = useTranslation();
 
-  const [participants, setParticipants] = useState<Participant[]>(() => {
-    const saved = localStorage.getItem('secretSantaParticipants');
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [participants, setParticipants] = useLocalStorage<Record<string, Participant>>('secretSantaParticipants', {}, migrateParticipants);
+  const [assignments, setAssignments] = useLocalStorage<GeneratedPairs | null>('secretSantaAssignments', null, migrateAssignments);
+  const [instructions, setInstructions] = useLocalStorage<string>('secretSantaInstructions', '');
 
-  const [assignments, setAssignments] = useState<[string, string][]>(() => {
-    const saved = localStorage.getItem('secretSantaAssignments');
-    return saved ? JSON.parse(saved) : [];
-  });
-
-  const [selectedParticipant, setSelectedParticipant] = useState<string | null>(null);
+  const [selectedParticipantId, setSelectedParticipantId] = useState<string | null>(null);
   const [isRulesModalOpen, setIsRulesModalOpen] = useState(false);
-  const [openSection, setOpenSection] = useState<'participants' | 'links'>('participants');
-
-  useEffect(() => {
-    localStorage.setItem('secretSantaParticipants', JSON.stringify(participants));
-  }, [participants]);
-
-  useEffect(() => {
-    localStorage.setItem('secretSantaAssignments', JSON.stringify(assignments));
-  }, [assignments]);
+  const [openSection, setOpenSection] = useState<'participants' | 'links' | 'settings'>('participants');
 
   const handleGeneratePairs = () => {
-    const pairs = generatePairs(participants);
-    if (pairs === null) {
-      alert(participants.length < 2 
+    const assignments = generatePairs(participants);
+    if (assignments === null) {
+      alert(Object.keys(participants).length < 2 
         ? t('home.errors.needMoreParticipants')
         : t('home.errors.invalidPairs')
       );
       return;
     }
-    setAssignments(pairs);
+
+    setAssignments(assignments);
     setOpenSection('links');
   };
 
-  const getAssignmentLink = async (giver: string, receiver: string) => {
-    const baseUrl = `${window.location.origin}${window.location.pathname.replace(/\/[^/]*$/, '')}`;
-    const encryptedReceiver = await encryptText(receiver);
-    return `${baseUrl}/pairing?from=${encodeURIComponent(giver)}&to=${encodeURIComponent(encryptedReceiver)}`;
-  };
+  const menuItems = [
+    <MenuItem key={`vanity`} to="https://bsky.app/profile/mael.dev" icon={<Heart className={`text-red-700`} weight={`fill`}/>}>
+      {t(`home.vanity`)}
+    </MenuItem>
+  ];
 
-  const copyToClipboard = async (giver: string, receiver: string) => {
-    try {
-      const link = await getAssignmentLink(giver, receiver);
-      await navigator.clipboard.writeText(link);
-    } catch (err) {
-      console.error('Failed to copy:', err);
-    }
-  };
-
-  return (
+  return <>
     <PageTransition>
-      <div className="min-h-screen flex items-center justify-center pt-28 p-4 sm:p-6 md:p-12">
-        <SideMenu>
-          <MenuItem to="https://bsky.app/profile/mael.dev" icon={<Heart className={`text-red-700`} weight={`fill`}/>}>
-            Project started in 2015 by Maël
-          </MenuItem>
-        </SideMenu>
-
-        <div className="container mx-auto max-w-5xl">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
-            <div>
-              <PostCard>
-                <div className="space-y-4">
-                  <h1 className="text-xl sm:text-2xl font-bold mb-4 text-red-700">
-                    {t('home.title')}
-                  </h1>
-                  <div className="space-y-4 text-gray-600">
-                    <p>
-                      {t('home.welcome')}
-                    </p>
-                    <p>
-                      <Trans
-                        i18nKey="home.noBackend"
-                        components={{
-                          githubLink: <a className="text-blue-500 underline" href="https://github.com/arcanis/secretsanta/" target="_blank"/>
-                        }}
-                      />
-                    </p>
-                    <p>
-                      <Trans
-                        i18nKey="home.explanation"
-                        components={{
-                          exampleLink: <Link className="text-blue-500 underline" to="/pairing?from=Simba&to=c1w%2FUV9lXC12U578BHPYZhXxhsK0fPTqoQDU9CA7W581P%2BM%3D"/>
-                        }}
-                      />
-                    </p>
-                  </div>
-                </div>
-              </PostCard>
+      <Layout menuItems={menuItems}>
+        <div className="lg:flex-[6_6_0%]">
+          <PostCard>
+            <div className="space-y-4">
+              <h1 className="text-xl sm:text-2xl font-bold mb-4 text-red-700">
+                {t('home.title')}
+              </h1>
+              <div className="space-y-4 text-gray-600">
+                <Trans
+                  i18nKey="home.explanation"
+                  components={{
+                    p: <p/>,
+                    githubLink: <a className="text-blue-500 underline" href="https://github.com/arcanis/secretsanta/" target="_blank"/>,
+                    exampleLink: <Link className="text-blue-500 underline" to="/pairing?from=Simba&to=c1w%2FUV9lXC12U578BHPYZhXxhsK0fPTqoQDU9CA7W581P%2BM%3D"/>,
+                  }}
+                />
+              </div>
             </div>
-
-            <div className="order-2 lg:order-none w-full">
-              <AccordionContainer>
-                <Accordion
-                  title={t('participants.title')}
-                  isOpen={openSection === 'participants'}
-                  onToggle={() => setOpenSection('participants')}
-                >
-                  <ParticipantsList
-                    participants={participants}
-                    onChangeParticipants={setParticipants}
-                    onOpenRules={(name) => {
-                      setSelectedParticipant(name);
-                      setIsRulesModalOpen(true);
-                    }}
-                    onGeneratePairs={handleGeneratePairs}
-                  />
-                </Accordion>
-
-                {assignments.length > 0 && (
-                  <Accordion
-                    title={t('links.title')}
-                    isOpen={openSection === 'links'}
-                    onToggle={() => setOpenSection('links')}
-                  >
-                    <SecretSantaLinks
-                      assignments={assignments}
-                      onCopyLink={copyToClipboard}
-                    />
-                  </Accordion>
-                )}
-
-                {isRulesModalOpen && selectedParticipant && (
-                  <RulesModal
-                    isOpen={isRulesModalOpen}
-                    onClose={() => setIsRulesModalOpen(false)}
-                    participant={selectedParticipant}
-                    participants={participants}
-                    onChangeParticipants={setParticipants}
-                  />
-                )}
-              </AccordionContainer>
-            </div>
-          </div>
+          </PostCard>
         </div>
-      </div>
+
+        <div className="lg:order-none lg:flex-[5_5_0%]">
+          <AccordionContainer>
+            <Accordion
+              title={t('participants.title')}
+              isOpen={openSection === 'participants'}
+              onToggle={() => setOpenSection('participants')}
+            >
+              <ParticipantsList
+                participants={participants}
+                onChangeParticipants={setParticipants}
+                onOpenRules={(id) => {
+                  setSelectedParticipantId(id);
+                  setIsRulesModalOpen(true);
+                }}
+                onGeneratePairs={handleGeneratePairs}
+              />
+            </Accordion>
+
+            <Accordion
+              title={t('settings.title')}
+              isOpen={openSection === 'settings'}
+              onToggle={() => setOpenSection('settings')}
+            >
+              <Settings
+                instructions={instructions}
+                onChangeInstructions={setInstructions}
+              />
+            </Accordion>
+
+            {assignments && (
+              <Accordion
+                title={t('links.title')}
+                isOpen={openSection === 'links'}
+                onToggle={() => setOpenSection('links')}
+              >
+                <SecretSantaLinks
+                  assignments={assignments}
+                  instructions={instructions}
+                  participants={participants}
+                  onGeneratePairs={handleGeneratePairs}
+                />
+              </Accordion>
+            )}
+          </AccordionContainer>
+        </div>
+      </Layout>
     </PageTransition>
-  );
+    {isRulesModalOpen && selectedParticipantId && (
+      <RulesModal
+        isOpen={isRulesModalOpen}
+        onClose={() => setIsRulesModalOpen(false)}
+        participants={participants}
+        participantId={selectedParticipantId}
+        onChangeParticipants={setParticipants}
+      />
+    )}
+  </>;
 }

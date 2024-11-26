@@ -5,7 +5,8 @@
 body {
   background: url(../static/snow.png), url(../static/snow.png), #fefae8 url(../static/cats.png) bottom left no-repeat;
   background-repeat: repeat, repeat, no-repeat;
-  background-size: auto auto, auto auto, auto 100%;
+  background-size: auto auto, auto auto, contain;
+  background-attachment: fixed, fixed, fixed;
   animation-name: snow;
   animation-duration: 5s;
   animation-iteration-count: infinite;

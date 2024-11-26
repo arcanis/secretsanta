@@ -1,38 +1,52 @@
-interface Rule {
-  type: 'must' | 'mustNot';
-  targetParticipant: string;
+import { Participant } from "../types";
+
+export type GeneratedPairs = {
+  hash: string;
+  pairings: {
+    giver: {id: string; name: string};
+    receiver: {id: string; name: string};
+  }[];
+};
+
+export function generateGenerationHash(participants: Record<string, Participant>): string {
+  return JSON.stringify(Object.values(participants).map(p => ({rules: p.rules})));
 }
 
-interface Participant {
-  name: string;
-  rules: Rule[];
-}
-
-export function generatePairs(participants: Participant[]): [string, string][] | null {
-  if (participants.length < 2) {
+export function generatePairs(participants: Record<string, Participant>): GeneratedPairs | null {
+  const participantsList = Object.values(participants);
+  
+  if (participantsList.length < 2) {
     return null;
   }
 
-  // Initialize arrays of available givers and receivers
-  let availableGivers = new Set(participants.map(p => p.name));
-  let availableReceivers = new Set(participants.map(p => p.name));
+  // First, check if the rules are valid
+  if (participantsList.some(p => p.rules.some(r => {
+    if (r.type === 'must' && !participants[r.targetParticipantId]) {
+      return true; // Invalid target
+    }
+    return false;
+  }))) {
+    return null;
+  }
+
+  // Initialize sets of available givers and receivers using IDs
+  let availableGivers = new Set(Object.keys(participants));
+  let availableReceivers = new Set(Object.keys(participants));
   
   // Initialize the final pairs
   const pairs: Map<string, string> = new Map();
 
   // First, handle all MUST rules
-  for (const participant of participants) {
+  for (const participant of participantsList) {
     const mustRule = participant.rules.find(r => r.type === 'must');
     if (mustRule) {
-      // Check if this pairing is possible
-      if (!availableReceivers.has(mustRule.targetParticipant)) {
+      if (!availableReceivers.has(mustRule.targetParticipantId)) {
         return null; // Impossible to satisfy MUST rules
       }
 
-      // Add the required pairing
-      pairs.set(participant.name, mustRule.targetParticipant);
-      availableGivers.delete(participant.name);
-      availableReceivers.delete(mustRule.targetParticipant);
+      pairs.set(participant.id, mustRule.targetParticipantId);
+      availableGivers.delete(participant.id);
+      availableReceivers.delete(mustRule.targetParticipantId);
     }
   }
 
@@ -57,45 +71,37 @@ export function generatePairs(participants: Participant[]): [string, string][] |
     let isValid = true;
 
     for (let i = 0; i < remainingGivers.length; i++) {
-      const giver = remainingGivers[i];
-      const receiver = remainingReceivers[i];
+      const giverId = remainingGivers[i];
+      const receiverId = remainingReceivers[i];
       
-      // Check for self-assignment (not allowed unless specified by MUST rule)
-      if (giver === receiver) {
+      // Check for self-assignment
+      if (giverId === receiverId) {
         isValid = false;
         break;
       }
 
       // Check MUST NOT rules
-      const giverRules = participants.find(p => p.name === giver)?.rules || [];
-      const mustNotViolation = giverRules.some(rule => 
-        rule.type === 'mustNot' && rule.targetParticipant === receiver
-      );
+      const mustNotViolation = participants[giverId].rules
+        .some(rule => rule.type === 'mustNot' && rule.targetParticipantId === receiverId);
 
       if (mustNotViolation) {
         isValid = false;
         break;
       }
 
-      tempPairs.set(giver, receiver);
+      tempPairs.set(giverId, receiverId);
     }
 
     if (isValid) {
-      // Verify no self-assignments in final result (except for MUST rules)
-      const finalPairs = Array.from(tempPairs);
-      const hasSelfAssignment = finalPairs.some(([giver, receiver]) => {
-        if (giver === receiver) {
-          // Check if this self-assignment was required by a MUST rule
-          const participant = participants.find(p => p.name === giver);
-          const mustRule = participant?.rules.find(r => r.type === 'must');
-          return !mustRule || mustRule.targetParticipant !== giver;
-        }
-        return false;
-      });
+      const pairings = [...tempPairs].map(([giverId, receiverId]) => ({
+        giver: {id: giverId, name: participants[giverId].name},
+        receiver: {id: receiverId, name: participants[receiverId].name},
+      }));
 
-      if (!hasSelfAssignment) {
-        return finalPairs;
-      }
+      return {
+        hash: generateGenerationHash(participants),
+        pairings,
+      };
     }
 
     attempts++;

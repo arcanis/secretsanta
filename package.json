@@ -9,24 +9,27 @@
     "@phosphor-icons/react": "^2.1.7",
     "country-flag-icons": "^1.5.13",
     "crypto-js": "3.1.2",
+    "fast-check": "^3.23.1",
     "framer-motion": "^11.11.17",
     "i18next": "^24.0.2",
     "i18next-browser-languagedetector": "^8.0.0",
+    "immer": "^10.1.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-i18next": "^15.1.1",
-    "react-router-dom": "^6.28.0"
+    "react-router-dom": "^6.28.0",
+    "vitest": "^2.1.5"
   },
   "devDependencies": {
     "@types/crypto-js": "^3",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "@types/react-world-flags": "^1",
-    "@vitejs/plugin-react": "^4.3.3",
+    "@vitejs/plugin-react": "^4.3.4",
     "autoprefixer": "^10.4.20",
     "postcss": "^8.4.49",
     "tailwindcss": "^3.4.15",
     "typescript": "^5.6.3",
-    "vite": "^6.0.0-beta"
+    "vite": "^6.0.0"
   }
 }
