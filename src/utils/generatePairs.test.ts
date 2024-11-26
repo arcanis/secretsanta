@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import * as fc from 'fast-check';
 import { generatePairs } from './generatePairs';
-import { Participant } from '../types';
+import { Participant, Rule } from '../types';
 
 describe('generatePairs', () => {
   // Arbitrary to generate valid participant names (non-empty strings)
@@ -9,30 +9,37 @@ describe('generatePairs', () => {
 
   // Arbitrary to generate a valid participant
   const participantArb = fc.record({
+    id: fc.string(),
     name: nameArb,
     rules: fc.array(
       fc.record({
         type: fc.constantFrom<'must' | 'mustNot'>('must', 'mustNot'),
-        targetParticipantIndex: fc.nat()
+        targetParticipantId: fc.string()
       }),
       { maxLength: 3 }
     )
   });
 
   // Updated participantsArb to generate valid rule combinations
-  const participantsArb = fc.array(participantArb, { minLength: 2, maxLength: 10 })
-    .map(participants => {
-      // Fix rule indexes and ensure rule consistency
-      return participants.map(p => {
-        const rules = p.rules
+  const participantsArb = fc.dictionary(
+    fc.string(),
+    participantArb,
+    { minKeys: 2, maxKeys: 10 }
+  ).map(participants => {
+    // Fix rule IDs and ensure rule consistency
+    return Object.fromEntries(
+      Object.entries(participants).map(([id, participant]) => {
+        const rules = participant.rules
           // Remove duplicate rules for the same target
           .filter((rule, index, self) => 
-            index === self.findIndex(r => r.targetParticipantIndex === rule.targetParticipantIndex)
+            index === self.findIndex(r => r.targetParticipantId === rule.targetParticipantId)
           )
-          // Ensure valid indexes
+          // Ensure valid IDs
           .map(r => ({
             ...r,
-            targetParticipantIndex: r.targetParticipantIndex % participants.length
+            targetParticipantId: Object.keys(participants)[
+              parseInt(r.targetParticipantId) % Object.keys(participants).length
+            ]
           }));
 
         // Ensure no more than one MUST rule
@@ -46,16 +53,18 @@ describe('generatePairs', () => {
         const finalRules = mustRule
           ? validRules.filter(r => 
               r.type === 'must' || 
-              r.targetParticipantIndex !== mustRule.targetParticipantIndex
+              r.targetParticipantId !== mustRule.targetParticipantId
             )
           : validRules;
 
-        return {
-          ...p,
+        return [id, {
+          ...participant,
+          id,
           rules: finalRules
-        };
-      });
-    });
+        }];
+      })
+    );
+  });
 
   it('should always return valid pairings or null', () => {
     fc.assert(
@@ -67,41 +76,39 @@ describe('generatePairs', () => {
         }
 
         // Properties that must hold for valid pairings:
-        expect(result).toHaveLength(participants.length);
+        expect(result.pairings).toHaveLength(Object.keys(participants).length);
         
-        const givers = new Set(result.map(([giver]) => giver));
-        const receivers = new Set(result.map(([_, receiver]) => receiver));
+        const givers = new Set(result.pairings.map(({giver}) => giver.id));
+        const receivers = new Set(result.pairings.map(({receiver}) => receiver.id));
         
         // Everyone gives exactly once
-        expect(givers.size).toBe(participants.length);
+        expect(givers.size).toBe(Object.keys(participants).length);
         // Everyone receives exactly once
-        expect(receivers.size).toBe(participants.length);
+        expect(receivers.size).toBe(Object.keys(participants).length);
         
         // All MUST rules are respected
-        result.forEach(([giver, receiver]) => {
-          const mustRules = giver.rules.filter(r => r.type === 'must');
+        result.pairings.forEach(({giver, receiver}) => {
+          const mustRules = participants[giver.id].rules.filter(r => r.type === 'must');
           
           mustRules.forEach(rule => {
-            expect(receiver).toBe(participants[rule.targetParticipantIndex]);
+            expect(receiver.id).toBe(rule.targetParticipantId);
           });
         });
 
         // All MUST NOT rules are respected
-        result.forEach(([giver, receiver]) => {
-          const mustNotRules = giver.rules.filter(r => r.type === 'mustNot');
+        result.pairings.forEach(({giver, receiver}) => {
+          const mustNotRules = participants[giver.id].rules.filter(r => r.type === 'mustNot');
           
           mustNotRules.forEach(rule => {
-            expect(receiver).not.toBe(participants[rule.targetParticipantIndex]);
+            expect(receiver.id).not.toBe(rule.targetParticipantId);
           });
         });
 
         // No self-assignments unless required by MUST rule
-        result.forEach(([giver, receiver]) => {
-          if (giver === receiver) {
-            const giverParticipant = participants.find(p => p === giver)!;
-            const selfAssignmentRequired = giverParticipant.rules.some(
-              r => r.type === 'must' && 
-              participants[r.targetParticipantIndex].name === giver.name
+        result.pairings.forEach(({giver, receiver}) => {
+          if (giver.id === receiver.id) {
+            const selfAssignmentRequired = participants[giver.id].rules.some(
+              (r: Rule) => r.type === 'must' && r.targetParticipantId === giver.id
             );
             expect(selfAssignmentRequired).toBe(true);
           }
@@ -114,13 +121,18 @@ describe('generatePairs', () => {
     // Test case: everyone MUST NOT give to everyone else
     fc.assert(
       fc.property(fc.integer({ min: 2, max: 5 }), (size) => {
-        const participants: Participant[] = Array.from({ length: size }, (_, i) => ({
-          name: `Person${i}`,
-          rules: Array.from({ length: size }, (_, j) => ({
-            type: 'mustNot' as const,
-            targetParticipantIndex: j
-          }))
-        }));
+        const participants: Record<string, Participant> = {};
+        for (let i = 0; i < size; i++) {
+          const id = `person${i}`;
+          participants[id] = {
+            id,
+            name: `Person${i}`,
+            rules: Object.keys(participants).map(targetId => ({
+              type: 'mustNot' as const,
+              targetParticipantId: targetId
+            }))
+          };
+        }
 
         const result = generatePairs(participants);
         expect(result).toBeNull();
@@ -129,47 +141,53 @@ describe('generatePairs', () => {
   });
 
   it('should handle circular MUST rules correctly', () => {
-    // Test case: A must give to B, B must give to C, C must give to A
-    const participants: Participant[] = [
-      { name: 'A', rules: [{ type: 'must', targetParticipantIndex: 1 }] },
-      { name: 'B', rules: [{ type: 'must', targetParticipantIndex: 2 }] },
-      { name: 'C', rules: [{ type: 'must', targetParticipantIndex: 0 }] },
-    ];
+    const participants: Record<string, Participant> = {
+      'A': { id: 'A', name: 'A', rules: [{ type: 'must', targetParticipantId: 'B' }] },
+      'B': { id: 'B', name: 'B', rules: [{ type: 'must', targetParticipantId: 'C' }] },
+      'C': { id: 'C', name: 'C', rules: [{ type: 'must', targetParticipantId: 'A' }] },
+    };
 
     const result = generatePairs(participants);
-    expect(result).toEqual([
-      [participants[0], participants[1]],
-      [participants[1], participants[2]],
-      [participants[2], participants[0]],
+    expect(result?.pairings.map(({giver, receiver}) => [
+      participants[giver.id],
+      participants[receiver.id],
+    ])).toEqual([
+      [participants['A'], participants['B']],
+      [participants['B'], participants['C']],
+      [participants['C'], participants['A']],
     ]);
   });
 
   it('should return null for invalid rule configurations', () => {
     // Test multiple MUST rules
-    const multiMustParticipants: Participant[] = [
-      { 
+    const multiMustParticipants: Record<string, Participant> = {
+      'A': { 
+        id: 'A',
         name: 'A', 
         rules: [
-          { type: 'must', targetParticipantIndex: 1 },
-          { type: 'must', targetParticipantIndex: 2 }
+          { type: 'must', targetParticipantId: 'B' },
+          { type: 'must', targetParticipantId: 'C' }
         ] 
       },
-      { name: 'B', rules: [] },
-      { name: 'C', rules: [] },
-    ];
+      'B': { id: 'B', name: 'B', rules: [] },
+      'C': { id: 'C', name: 'C', rules: [] },
+    };
+
     expect(generatePairs(multiMustParticipants)).toBeNull();
 
     // Test conflicting MUST/MUST NOT rules
-    const conflictingRulesParticipants: Participant[] = [
-      { 
+    const conflictingRulesParticipants: Record<string, Participant> = {
+      'A': { 
+        id: 'A',
         name: 'A', 
         rules: [
-          { type: 'must', targetParticipantIndex: 1 },
-          { type: 'mustNot', targetParticipantIndex: 1 }
+          { type: 'must', targetParticipantId: 'B' },
+          { type: 'mustNot', targetParticipantId: 'B' }
         ] 
       },
-      { name: 'B', rules: [] },
-    ];
+      'B': { id: 'B', name: 'B', rules: [] },
+    };
+
     expect(generatePairs(conflictingRulesParticipants)).toBeNull();
   });
 }); 

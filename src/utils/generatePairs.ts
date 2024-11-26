@@ -1,5 +1,24 @@
 import { Participant } from "../types";
 
+export function checkRules(participants: Record<string, Participant>): string | null {
+  for (const participant of Object.values(participants)) {
+    const mustRules = participant.rules.filter(r => r.type === 'must');
+    if (mustRules.length > 1) {
+      return `${participant.name} has multiple MUST rules`;
+    } else if (mustRules.length === 1) {
+      if (participant.rules.some(r => r.type === 'mustNot' && r.targetParticipantId === mustRules[0].targetParticipantId)) {
+        return `${participant.name} has both a MUST and a MUST NOT rule`;
+      }
+    }
+  }
+
+  return null;
+}
+
+export function generateGenerationHash(participants: Record<string, Participant>): string {
+  return JSON.stringify(Object.values(participants).map(p => ({rules: p.rules})));
+}
+
 export type GeneratedPairs = {
   hash: string;
   pairings: {
@@ -8,14 +27,14 @@ export type GeneratedPairs = {
   }[];
 };
 
-export function generateGenerationHash(participants: Record<string, Participant>): string {
-  return JSON.stringify(Object.values(participants).map(p => ({rules: p.rules})));
-}
-
 export function generatePairs(participants: Record<string, Participant>): GeneratedPairs | null {
   const participantsList = Object.values(participants);
   
   if (participantsList.length < 2) {
+    return null;
+  }
+
+  if (checkRules(participants)) {
     return null;
   }
 
