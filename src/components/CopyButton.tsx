@@ -12,15 +12,24 @@ export function CopyButton({ textToCopy, className = "", children }: CopyButtonP
   const [isCopied, setIsCopied] = useState(false);
 
   const handleCopy = async () => {
+    const textPromise = typeof textToCopy === 'function'
+      ? textToCopy().then(text => new Blob([text], { type: 'text/plain' }))
+      : Promise.resolve(textToCopy);
+
+    const clipboardItem = new ClipboardItem({
+      'text/plain': textPromise,
+    });
+
     try {
-      const text = typeof textToCopy === 'function' ? await textToCopy() : textToCopy;
-      await navigator.clipboard.writeText(text);
-      setIsCopied(true);
-      setTimeout(() => setIsCopied(false), 2000);
+      await navigator.clipboard.write([clipboardItem]);
     } catch (err) {
       console.error('Failed to copy:', err);
+      return;
     }
-  };
+
+    setIsCopied(true);
+    setTimeout(() => setIsCopied(false), 2000);
+};
 
   return (
     <button
