@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import * as fc from 'fast-check';
-import { generatePairs } from './generatePairs';
+import { GeneratedPairs, generatePairs } from './generatePairs';
 import { Participant, Rule } from '../types';
-import { parseParticipantsText } from './parseParticipants';
+import { parseParticipantsText, ParseSuccess } from './parseParticipants';
 
 describe('generatePairs', () => {
   // Arbitrary to generate valid participant names (non-empty strings)
@@ -193,7 +193,7 @@ describe('generatePairs', () => {
   });
 
   it('should support generating complex configurations', () => {
-    const participants = parseParticipantsText(`
+    const parseResult = parseParticipantsText(`
       Alice !Brian !Claire
       Brian !Alice !Claire
       Claire !Brian !Alice
@@ -214,9 +214,74 @@ describe('generatePairs', () => {
       Ryan !Quinn !Matthew !Nina !Olivia !Paige
     `);
 
-    expect(participants.ok).toBe(true);
+    expect(parseResult.ok).toBe(true);
+    const parseOk = parseResult as ParseSuccess;
 
-    const result = generatePairs((participants as any).participants);
+    const result = generatePairs(parseOk.participants);
     expect(result).not.toBeNull();
+  });
+
+  it('should generate valid pairings for a given complex configuration', () => {
+    const parseResult = parseParticipantsText(`
+      Alice !Brian !Claire
+      Brian !Alice !Claire
+      Claire !Brian !Alice
+      Ethan !Fiona !Grace !Hannah !Ivy !Jack !Kyle
+      Fiona !Ethan !Grace !Hannah !Ivy !Jack !Kyle
+      Grace !Fiona !Ethan !Hannah !Ivy !Jack !Kyle
+      Hannah !Fiona !Grace !Ethan !Ivy !Jack !Kyle
+      Ivy !Fiona !Grace !Hannah !Ethan !Jack !Kyle
+      Kyle !Fiona !Grace !Hannah !Ethan !Jack !Ivy
+      Logan !Sophie
+      Sophie !Logan
+      Matthew !Nina !Olivia !Paige !Quinn !Ryan
+      Nina !Matthew !Olivia !Paige !Quinn !Ryan
+      Olivia !Nina !Matthew !Paige !Quinn !Ryan
+      Paige !Nina !Olivia !Matthew !Quinn !Ryan
+      Jack !Fiona !Grace !Hannah !Ethan !Ivy !Kyle
+      Quinn !Matthew !Nina !Olivia !Paige !Ryan
+      Ryan !Quinn !Matthew !Nina !Olivia !Paige
+    `);
+
+    expect(parseResult.ok).toBe(true);
+    const parseOk = parseResult as ParseSuccess;
+
+    for (let t = 0; t < 100; t++) {
+      const generationResult = generatePairs(parseOk.participants);
+
+      expect(generationResult).not.toBeNull();
+      const {pairings} = generationResult as GeneratedPairs;
+
+      // Verify each participant gives and receives exactly once
+      const givers = new Set(pairings.map(p => p.giver.id));
+      const receivers = new Set(pairings.map(p => p.receiver.id));
+      expect(givers.size).toBe(Object.keys(parseOk.participants).length);
+      expect(receivers.size).toBe(Object.keys(parseOk.participants).length);
+
+      // Verify no self-assignments
+      for (const {giver, receiver} of pairings) {
+        expect(giver.id).not.toBe(receiver.id);
+      }
+
+      // Verify all MUST NOT rules are respected
+      for (const {giver, receiver} of pairings) {
+        const participant = parseOk.participants[giver.id];
+        const mustNotRules = participant.rules.filter(r => r.type === 'mustNot');
+        
+        for (const rule of mustNotRules) {
+          expect(receiver.id).not.toBe(rule.targetParticipantId);
+        }
+      }
+
+      // Verify all MUST rules are respected
+      for (const {giver, receiver} of pairings) {
+        const participant = parseOk.participants[giver.id];
+        const mustRules = participant.rules.filter(r => r.type === 'must');
+
+        for (const rule of mustRules) {
+          expect(receiver.id).toBe(rule.targetParticipantId);
+        }
+      }
+    }
   });
 }); 

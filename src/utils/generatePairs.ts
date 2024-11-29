@@ -40,7 +40,7 @@ export function generatePairs(participants: Record<string, Participant>): Genera
   }
 
   // Initialize candidate receivers for each giver
-  const candidateReceivers = new Map<string, Set<string>>();
+  const initialCandidateReceivers = new Map<string, Set<string>>();
 
   for (const giverId of participantIds) {
     const giver = participants[giverId];
@@ -61,11 +61,11 @@ export function generatePairs(participants: Record<string, Participant>): Genera
         .forEach(r => candidates.delete(r.targetParticipantId));
     }
 
-    candidateReceivers.set(giverId, candidates);
+    initialCandidateReceivers.set(giverId, candidates);
   }
 
   // Find next giver with fewest options
-  const findNextGiver = (): string | null => {
+  const findNextGiver = (candidateReceivers: Map<string, Set<string>>): string | null => {
     let minOptions = Infinity;
     let result: string | null = null;
 
@@ -79,46 +79,52 @@ export function generatePairs(participants: Record<string, Participant>): Genera
     return result;
   };
 
-  // Generate pairings
-  const finalPairs = new Map<string, string>();
+  pairingGenerations:
+  for (let t = 0; t < 10; t++) {
+    // Generate pairings
+    const finalPairs = new Map<string, string>();
+    const candidateReceivers = structuredClone(initialCandidateReceivers);
 
-  while (candidateReceivers.size > 0) {
-    const giverId = findNextGiver();
-    if (!giverId) break;
+    while (candidateReceivers.size > 0) {
+      const giverId = findNextGiver(candidateReceivers);
+      if (!giverId) break;
 
-    const candidates = candidateReceivers.get(giverId)!;
-    if (candidates.size === 0) {
-      return null; // No valid receivers left for this giver
+      const candidates = candidateReceivers.get(giverId)!;
+      if (candidates.size === 0) {
+        continue pairingGenerations; // No valid receivers left for this giver
+      }
+
+      // Randomly select a receiver from candidates
+      const receiverId = Array.from(candidates)[Math.floor(Math.random() * candidates.size)];
+      finalPairs.set(giverId, receiverId);
+
+      // Remove this receiver as an option for all remaining givers
+      candidateReceivers.delete(giverId);
+      for (const candidates of candidateReceivers.values()) {
+        candidates.delete(receiverId);
+      }
     }
 
-    // Randomly select a receiver from candidates
-    const receiverId = Array.from(candidates)[Math.floor(Math.random() * candidates.size)];
-    finalPairs.set(giverId, receiverId);
-
-    // Remove this receiver as an option for all remaining givers
-    candidateReceivers.delete(giverId);
-    for (const candidates of candidateReceivers.values()) {
-      candidates.delete(receiverId);
+    if (finalPairs.size !== participantIds.length) {
+      continue pairingGenerations; // Not everyone got paired
     }
+
+    const pairings = Array.from(finalPairs).map(([giverId, receiverId]) => ({
+      giver: {
+        id: giverId,
+        name: participants[giverId].name
+      },
+      receiver: {
+        id: receiverId,
+        name: participants[receiverId].name
+      }
+    }));
+
+    return {
+      hash: generateGenerationHash(participants),
+      pairings
+    };
   }
 
-  if (finalPairs.size !== participantIds.length) {
-    return null; // Not everyone got paired
-  }
-
-  const pairings = Array.from(finalPairs).map(([giverId, receiverId]) => ({
-    giver: {
-      id: giverId,
-      name: participants[giverId].name
-    },
-    receiver: {
-      id: receiverId,
-      name: participants[receiverId].name
-    }
-  }));
-
-  return {
-    hash: generateGenerationHash(participants),
-    pairings
-  };
+  return null;
 } 
