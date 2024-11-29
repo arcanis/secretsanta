@@ -14,7 +14,7 @@ describe('generatePairs', () => {
     rules: fc.array(
       fc.record({
         type: fc.constantFrom<'must' | 'mustNot'>('must', 'mustNot'),
-        targetParticipantId: fc.string()
+        targetParticipantId: fc.integer({ min: 0 })
       }),
       { maxLength: 3 }
     )
@@ -38,7 +38,7 @@ describe('generatePairs', () => {
           .map(r => ({
             ...r,
             targetParticipantId: Object.keys(participants)[
-              parseInt(r.targetParticipantId) % Object.keys(participants).length
+              r.targetParticipantId % Object.keys(participants).length
             ]
           }));
 

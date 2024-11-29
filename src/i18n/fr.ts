@@ -5,6 +5,18 @@ export const fr: Translations = {
     flag: "🇫🇷",
     name: "Français",
   },
+  errors: {
+    needMoreParticipants: "Il faut au moins 2 participants !",
+    invalidPairs: "Impossible de générer des paires valides avec les règles actuelles. Veuillez vérifier les règles et réessayer.",
+    multipleMustRules: "Conflit entre plusieurs règles requérant une association",
+    conflictingRules: "Conflit entre une règle requérant une association et une règle excluant cette même association",
+    emptyName: "Nom vide",
+    duplicateName: "Nom en double : {{name}}",
+    invalidRuleFormat: "Format de règle invalide : {{rule}}",
+    unknownParticipant: "Participant inconnu dans la règle : {{name}}",
+    noValidReceivers: "Aucun receveur valide restant pour ce participant",
+    line: "Ligne {{number}}"
+  },
   home: {
     vanity: "Projet lancé en hiver 2015 par Maël",
     title: "Planificateur de Secret Santa",
@@ -14,10 +26,6 @@ export const fr: Translations = {
       "Pas de comptes, pas d'emails, pas de tracas, et le tout hébergé sur de simples <githubLink>GitHub Pages</githubLink> !",
     ].map(line => `<p>${line}</p>`).join(''),
     exampleLink: "Exemple de lien",
-    errors: {
-      needMoreParticipants: "Il faut au moins 2 participants !",
-      invalidPairs: "Impossible de générer des paires valides avec les règles actuelles. Veuillez vérifier les règles et réessayer."
-    }
   },
   pairing: {
     title: "Votre Partenaire de Secret Santa",
@@ -34,7 +42,9 @@ export const fr: Translations = {
     editRules: "Modifier les règles",
     removeParticipant: "Supprimer le participant",
     rulesCount_one: "{{count}} règle définie",
-    rulesCount_other: "{{count}} règles définies"
+    rulesCount_other: "{{count}} règles définies",
+    switchToFormView: "Passer à la vue formulaire",
+    switchToTextView: "Passer à la vue texte",
   },
   rules: {
     title: "Règles pour {{name}}",

@@ -1,14 +1,12 @@
-import { Participant } from "../types";
+import { Participant, Rule } from "../types";
 
-export function checkRules(participants: Record<string, Participant>): string | null {
-  for (const participant of Object.values(participants)) {
-    const mustRules = participant.rules.filter(r => r.type === 'must');
-    if (mustRules.length > 1) {
-      return `${participant.name} has multiple MUST rules`;
-    } else if (mustRules.length === 1) {
-      if (participant.rules.some(r => r.type === 'mustNot' && r.targetParticipantId === mustRules[0].targetParticipantId)) {
-        return `${participant.name} has both a MUST and a MUST NOT rule`;
-      }
+export function checkRules(rules: Rule[]): string | null {
+  const mustRules = rules.filter(r => r.type === 'must');
+  if (mustRules.length > 1) {
+    return 'errors.multipleMustRules';
+  } else if (mustRules.length === 1) {
+    if (rules.some(r => r.type === 'mustNot' && r.targetParticipantId === mustRules[0].targetParticipantId)) {
+      return 'errors.conflictingRules';
     }
   }
 
@@ -28,103 +26,99 @@ export type GeneratedPairs = {
 };
 
 export function generatePairs(participants: Record<string, Participant>): GeneratedPairs | null {
-  const participantsList = Object.values(participants);
+  const participantIds = Object.keys(participants);
   
-  if (participantsList.length < 2) {
+  if (participantIds.length < 2) {
     return null;
   }
 
-  if (checkRules(participants)) {
-    return null;
-  }
-
-  // First, check if the rules are valid
-  if (participantsList.some(p => p.rules.some(r => {
-    if (r.type === 'must' && !participants[r.targetParticipantId]) {
-      return true; // Invalid target
+  // Validate rules
+  for (const participant of Object.values(participants)) {
+    if (checkRules(participant.rules)) {
+      return null;
     }
-    return false;
-  }))) {
-    return null;
   }
 
-  // Initialize sets of available givers and receivers using IDs
-  let availableGivers = new Set(Object.keys(participants));
-  let availableReceivers = new Set(Object.keys(participants));
-  
-  // Initialize the final pairs
-  const pairs: Map<string, string> = new Map();
+  // Initialize candidate receivers for each giver
+  const candidateReceivers = new Map<string, Set<string>>();
 
-  // First, handle all MUST rules
-  for (const participant of participantsList) {
-    const mustRule = participant.rules.find(r => r.type === 'must');
+  for (const giverId of participantIds) {
+    const giver = participants[giverId];
+    
+    // Start with all participants except self as potential receivers
+    const candidates = new Set(participantIds.filter(id => id !== giverId));
+    
+    // Handle MUST rules
+    const mustRule = giver.rules.find(r => r.type === 'must');
     if (mustRule) {
-      if (!availableReceivers.has(mustRule.targetParticipantId)) {
-        return null; // Impossible to satisfy MUST rules
-      }
+      // If there's a MUST rule, this is the only possible receiver
+      candidates.clear();
+      candidates.add(mustRule.targetParticipantId);
+    } else {
+      // Remove MUST NOT targets from candidates
+      giver.rules
+        .filter(r => r.type === 'mustNot')
+        .forEach(r => candidates.delete(r.targetParticipantId));
+    }
 
-      pairs.set(participant.id, mustRule.targetParticipantId);
-      availableGivers.delete(participant.id);
-      availableReceivers.delete(mustRule.targetParticipantId);
+    candidateReceivers.set(giverId, candidates);
+  }
+
+  // Find next giver with fewest options
+  const findNextGiver = (): string | null => {
+    let minOptions = Infinity;
+    let result: string | null = null;
+
+    for (const [giverId, candidates] of candidateReceivers) {
+      if (candidates.size < minOptions) {
+        minOptions = candidates.size;
+        result = giverId;
+      }
+    }
+
+    return result;
+  };
+
+  // Generate pairings
+  const finalPairs = new Map<string, string>();
+
+  while (candidateReceivers.size > 0) {
+    const giverId = findNextGiver();
+    if (!giverId) break;
+
+    const candidates = candidateReceivers.get(giverId)!;
+    if (candidates.size === 0) {
+      return null; // No valid receivers left for this giver
+    }
+
+    // Randomly select a receiver from candidates
+    const receiverId = Array.from(candidates)[Math.floor(Math.random() * candidates.size)];
+    finalPairs.set(giverId, receiverId);
+
+    // Remove this receiver as an option for all remaining givers
+    candidateReceivers.delete(giverId);
+    for (const candidates of candidateReceivers.values()) {
+      candidates.delete(receiverId);
     }
   }
 
-  // Convert remaining available participants to arrays for shuffling
-  let remainingGivers = Array.from(availableGivers);
-  let remainingReceivers = Array.from(availableReceivers);
-
-  // Try to match remaining participants
-  let attempts = 0;
-  const maxAttempts = 100;
-
-  while (attempts < maxAttempts) {
-    // Shuffle remaining receivers
-    for (let i = remainingReceivers.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [remainingReceivers[i], remainingReceivers[j]] = 
-        [remainingReceivers[j], remainingReceivers[i]];
-    }
-
-    // Try this combination
-    const tempPairs = new Map(pairs);
-    let isValid = true;
-
-    for (let i = 0; i < remainingGivers.length; i++) {
-      const giverId = remainingGivers[i];
-      const receiverId = remainingReceivers[i];
-      
-      // Check for self-assignment
-      if (giverId === receiverId) {
-        isValid = false;
-        break;
-      }
-
-      // Check MUST NOT rules
-      const mustNotViolation = participants[giverId].rules
-        .some(rule => rule.type === 'mustNot' && rule.targetParticipantId === receiverId);
-
-      if (mustNotViolation) {
-        isValid = false;
-        break;
-      }
-
-      tempPairs.set(giverId, receiverId);
-    }
-
-    if (isValid) {
-      const pairings = [...tempPairs].map(([giverId, receiverId]) => ({
-        giver: {id: giverId, name: participants[giverId].name},
-        receiver: {id: receiverId, name: participants[receiverId].name},
-      }));
-
-      return {
-        hash: generateGenerationHash(participants),
-        pairings,
-      };
-    }
-
-    attempts++;
+  if (finalPairs.size !== participantIds.length) {
+    return null; // Not everyone got paired
   }
 
-  return null;
+  const pairings = Array.from(finalPairs).map(([giverId, receiverId]) => ({
+    giver: {
+      id: giverId,
+      name: participants[giverId].name
+    },
+    receiver: {
+      id: receiverId,
+      name: participants[receiverId].name
+    }
+  }));
+
+  return {
+    hash: generateGenerationHash(participants),
+    pairings
+  };
 } 

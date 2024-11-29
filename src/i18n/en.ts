@@ -3,6 +3,18 @@ export const en = {
     flag: "🇺🇸",
     name: "English",
   },
+  errors: {
+    needMoreParticipants: "Need at least 2 participants!",
+    invalidPairs: "Couldn't generate valid pairs with the current rules. Please check the rules and try again.",
+    multipleMustRules: "Multiple MUST rules found",
+    conflictingRules: "Conflicting use of a MUST and MUST NOT rule",
+    emptyName: "Empty name",
+    duplicateName: "Duplicate name: {{name}}",
+    invalidRuleFormat: "Invalid rule format: {{rule}}",
+    unknownParticipant: "Unknown participant in rule: {{name}}",
+    noValidReceivers: "No valid receivers left for this participant",
+    line: "Line {{number}}"
+  },
   home: {
     vanity: "Project started in winter 2015 by Maël",
     title: "Secret Santa Planner",
@@ -12,10 +24,6 @@ export const en = {
       "No accounts, no emails, no hassle, and all hosted on <githubLink>GitHub Pages</githubLink> with no backend!",
     ].map(line => `<p>${line}</p>`).join(''),
     exampleLink: "Example link",
-    errors: {
-      needMoreParticipants: "Need at least 2 participants!",
-      invalidPairs: "Couldn't generate valid pairs with the current rules. Please check the rules and try again."
-    }
   },
   pairing: {
     title: "Your Secret Santa Assignment",
@@ -32,7 +40,9 @@ export const en = {
     editRules: "Edit rules",
     removeParticipant: "Remove participant",
     rulesCount_one: "{{count}} rule set",
-    rulesCount_other: "{{count}} rules set"
+    rulesCount_other: "{{count}} rules set",
+    switchToFormView: "Switch to form view",
+    switchToTextView: "Switch to text view"
   },
   rules: {
     title: "Rules for {{name}}",

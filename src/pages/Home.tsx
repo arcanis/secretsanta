@@ -4,14 +4,15 @@ import { GeneratedPairs, generatePairs } from '../utils/generatePairs';
 import { Accordion } from '../components/Accordion';
 import { AccordionContainer } from '../components/AccordionContainer';
 import { ParticipantsList } from '../components/ParticipantsList';
+import { ParticipantsTextView } from '../components/ParticipantsTextView';
 import { SecretSantaLinks } from '../components/SecretSantaLinks';
 import { Participant, Rule } from '../types';
 import { Link } from 'react-router-dom';
 import { PostCard } from '../components/PostCard';
 import { Trans, useTranslation } from 'react-i18next';
-import { MenuItem, SideMenu } from '../components/SideMenu';
+import { MenuItem } from '../components/SideMenu';
 import { PageTransition } from '../components/PageTransition';
-import { Heart } from '@phosphor-icons/react';
+import { Code, Heart, Rows } from '@phosphor-icons/react';
 import { Settings } from '../components/Settings';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { Layout } from '../components/Layout';
@@ -78,6 +79,7 @@ function migrateAssignments(value: any) {
 
 export function Home() {
   const { t } = useTranslation();
+  const [isTextView, setIsTextView] = useState(false);
 
   const [participants, setParticipants] = useLocalStorage<Record<string, Participant>>('secretSantaParticipants', {}, migrateParticipants);
   const [assignments, setAssignments] = useLocalStorage<GeneratedPairs | null>('secretSantaAssignments', null, migrateAssignments);
@@ -91,8 +93,8 @@ export function Home() {
     const assignments = generatePairs(participants);
     if (assignments === null) {
       alert(Object.keys(participants).length < 2 
-        ? t('home.errors.needMoreParticipants')
-        : t('home.errors.invalidPairs')
+        ? t('errors.needMoreParticipants')
+        : t('errors.invalidPairs')
       );
       return;
     }
@@ -106,6 +108,19 @@ export function Home() {
       {t(`home.vanity`)}
     </MenuItem>
   ];
+
+  const toggleViewButton = (
+    <button
+      onClick={(e) => {
+        e.stopPropagation();
+        setIsTextView(!isTextView);
+      }}
+      className="p-2 text-gray-200 hover:bg-gray-700 rounded-full"
+      title={t(isTextView ? 'participants.switchToFormView' : 'participants.switchToTextView')}
+    >
+      {isTextView ? <Rows size={20} weight={`bold`} /> : <Code size={20} weight={`bold`} />}
+    </button>
+  );
 
   return <>
     <PageTransition>
@@ -136,16 +151,25 @@ export function Home() {
               title={t('participants.title')}
               isOpen={openSection === 'participants'}
               onToggle={() => setOpenSection('participants')}
+              action={toggleViewButton}
             >
-              <ParticipantsList
-                participants={participants}
-                onChangeParticipants={setParticipants}
-                onOpenRules={(id) => {
-                  setSelectedParticipantId(id);
-                  setIsRulesModalOpen(true);
-                }}
-                onGeneratePairs={handleGeneratePairs}
-              />
+              {isTextView ? (
+                <ParticipantsTextView
+                  participants={participants}
+                  onChangeParticipants={setParticipants}
+                  onGeneratePairs={handleGeneratePairs}
+                />
+              ) : (
+                <ParticipantsList
+                  participants={participants}
+                  onChangeParticipants={setParticipants}
+                  onOpenRules={(id) => {
+                    setSelectedParticipantId(id);
+                    setIsRulesModalOpen(true);
+                  }}
+                  onGeneratePairs={handleGeneratePairs}
+                />
+              )}
             </Accordion>
 
             <Accordion

@@ -1,15 +1,14 @@
 import { CaretRight } from '@phosphor-icons/react';
-import { useRef, useEffect, useState } from 'react';
 
 interface AccordionProps {
   title: string;
   isOpen: boolean;
   onToggle: () => void;
   children: React.ReactNode;
-  titleClassName?: string;
+  action?: React.ReactNode;
 }
 
-export function Accordion({ title, isOpen, onToggle, children }: AccordionProps) {
+export function Accordion({ title, isOpen, onToggle, children, action }: AccordionProps) {
   return <>
     <button 
       onClick={onToggle}
@@ -17,9 +16,12 @@ export function Accordion({ title, isOpen, onToggle, children }: AccordionProps)
     >
       <div className="flex px-4 py-2 items-center justify-between text-white rounded">
         <h2 className={`text-xl`}>{title}</h2>
-        <span className={`transition-transform duration-300 ${isOpen ? 'rotate-90' : 'rotate-180'}`}>
-          <CaretRight className={`w-4 h-4`} weight={`fill`}/>
-        </span>
+        <div className="flex items-center gap-2">
+          {action}
+          <span className={`transition-transform duration-300 ${isOpen ? 'rotate-90' : 'rotate-180'}`}>
+            <CaretRight className={`w-4 h-4`} weight={`fill`}/>
+          </span>
+        </div>
       </div>
     </button>
 
