@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import * as fc from 'fast-check';
 import { generatePairs } from './generatePairs';
 import { Participant, Rule } from '../types';
+import { parseParticipantsText } from './parseParticipants';
 
 describe('generatePairs', () => {
   // Arbitrary to generate valid participant names (non-empty strings)
@@ -189,5 +190,33 @@ describe('generatePairs', () => {
     };
 
     expect(generatePairs(conflictingRulesParticipants)).toBeNull();
+  });
+
+  it('should support generating complex configurations', () => {
+    const participants = parseParticipantsText(`
+      Alice !Brian !Claire
+      Brian !Alice !Claire
+      Claire !Brian !Alice
+      Ethan !Fiona !Grace !Hannah !Ivy !Jack !Kyle
+      Fiona !Ethan !Grace !Hannah !Ivy !Jack !Kyle
+      Grace !Fiona !Ethan !Hannah !Ivy !Jack !Kyle
+      Hannah !Fiona !Grace !Ethan !Ivy !Jack !Kyle
+      Ivy !Fiona !Grace !Hannah !Ethan !Jack !Kyle
+      Kyle !Fiona !Grace !Hannah !Ethan !Jack !Ivy
+      Logan !Sophie
+      Sophie !Logan
+      Matthew !Nina !Olivia !Paige !Quinn !Ryan
+      Nina !Matthew !Olivia !Paige !Quinn !Ryan
+      Olivia !Nina !Matthew !Paige !Quinn !Ryan
+      Paige !Nina !Olivia !Matthew !Quinn !Ryan
+      Jack !Fiona !Grace !Hannah !Ethan !Ivy !Kyle
+      Quinn !Matthew !Nina !Olivia !Paige !Ryan
+      Ryan !Quinn !Matthew !Nina !Olivia !Paige
+    `);
+
+    expect(participants.ok).toBe(true);
+
+    const result = generatePairs((participants as any).participants);
+    expect(result).not.toBeNull();
   });
 }); 
