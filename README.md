@@ -1,6 +1,8 @@
 # Secret Santa
 
-Check it live on [mael.dev/secretsanta/](https://mael.dev/secretsanta/).
+Check it live on [mael.dev/secretsanta/](https://mael.dev/secretsanta/)!
+
+Should you appreciate this tool so much that you'd like to thank me, you can either drop a friendly note in this repository's issues, or be a [one-time sponsor](https://github.com/sponsors/arcanis?frequency=one-time&sponsor=arcanis)! I'd be very grateful for either 😊
 
 ## License (MIT)
 
