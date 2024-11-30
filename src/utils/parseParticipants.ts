@@ -33,8 +33,7 @@ export function formatParticipantText(participants: Record<string, Participant>)
   }).join('');
 }
 
-const PAREN_1 = /[!=(]/g;
-const PAREN_2 = /[()]/g;
+const PAREN = /[!=(]/;
 
 export function parseParticipantsText(input: string, existingParticipants?: Record<string, Participant>): ParseResult {
   const lines = input.split('\n').map(line => line.trim());
@@ -52,7 +51,7 @@ export function parseParticipantsText(input: string, existingParticipants?: Reco
     const line = lines[i].trim();
     if (line === '') continue;
 
-    let splitIndex = PAREN_1.exec(line)?.index;
+    let splitIndex = PAREN.exec(line)?.index;
 
     const name = typeof splitIndex === 'number'
       ? line.slice(0, splitIndex).trim()

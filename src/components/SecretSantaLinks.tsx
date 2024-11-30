@@ -25,8 +25,6 @@ export function SecretSantaLinks({ assignments, instructions, participants, onGe
     participants[receiver.id]?.hint,
   ]);
 
-  console.log(assignments.pairings, participants)
-
   adjustedPairings.sort((a, b) => {
     return a[0].localeCompare(b[0]);
   });

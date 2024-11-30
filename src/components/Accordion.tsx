@@ -10,9 +10,9 @@ interface AccordionProps {
 
 export function Accordion({ title, isOpen, onToggle, children, action }: AccordionProps) {
   return <>
-    <button 
+    <div 
       onClick={onToggle}
-      className="w-full p-1 text-left mb-2 bg-postcard-nowhite rounded-lg"
+      className="w-full p-1 text-left mb-2 bg-postcard-nowhite rounded-lg cursor-pointer"
     >
       <div className="flex px-4 py-2 items-center justify-between text-white rounded">
         <h2 className={`text-xl`}>{title}</h2>
@@ -23,7 +23,7 @@ export function Accordion({ title, isOpen, onToggle, children, action }: Accordi
           </span>
         </div>
       </div>
-    </button>
+    </div>
 
     <div className={`${isOpen ? 'flex-1' : 'flex-0'} transition-[flex] h-0 duration-300 ease-in-out overflow-y-scroll`}>
       <div className={`pb-2`}>
