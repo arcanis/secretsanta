@@ -1,8 +1,12 @@
 # Secret Santa
 
-Check it live on [mael.dev/secretsanta/](https://mael.dev/secretsanta/)!
+<img align="right" height="160" src="https://user-images.githubusercontent.com/1037931/87014534-92e21280-c1cc-11ea-9675-5f2c0f3c287f.png"/>
 
-Should you appreciate this tool so much that you'd like to thank me, you can either drop a friendly note in this repository's issues, or be a [one-time sponsor](https://github.com/sponsors/arcanis?frequency=one-time&sponsor=arcanis)! I'd be very grateful for either 😊
+Check it live on [mael.dev/secretsanta/](https://mael.dev/secretsanta/) 🎄
+
+Should you appreciate this tool so much that you'd like to thank me, you can either drop a friendly note in this repository's issues, or be a [one-time sponsor](https://github.com/sponsors/arcanis?frequency=one-time&sponsor=arcanis). Either would make my day 😊
+
+<br/>
 
 ## License (MIT)
 
