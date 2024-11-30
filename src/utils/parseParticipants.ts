@@ -25,11 +25,18 @@ export function formatParticipantText(participants: Record<string, Participant>)
       .filter(r => r.type === 'mustNot')
       .map(r => `!${participants[r.targetParticipantId]?.name ?? ''}`);
 
-    return `${[participant.name, ...mustRules, ...mustNotRules].join(' ')}\n`;
+    const hintPart = participant.hint
+      ? [`(${participant.hint})`]
+      : [];
+
+    return `${[participant.name, ...hintPart, ...mustRules, ...mustNotRules].join(' ')}\n`;
   }).join('');
 }
 
-export function parseParticipantsText(input: string): ParseResult {
+const PAREN_1 = /[!=(]/g;
+const PAREN_2 = /[()]/g;
+
+export function parseParticipantsText(input: string, existingParticipants?: Record<string, Participant>): ParseResult {
   const lines = input.split('\n').map(line => line.trim());
   const result: Record<string, Participant> = {};
   const nameToId: Record<string, string> = {};
@@ -37,6 +44,7 @@ export function parseParticipantsText(input: string): ParseResult {
   const parsedLines: {
     line: number,
     name: string,
+    hint?: string,
     extra: string[],
   }[] = [];
 
@@ -44,20 +52,47 @@ export function parseParticipantsText(input: string): ParseResult {
     const line = lines[i].trim();
     if (line === '') continue;
 
-    const parts = line
+    let splitIndex = PAREN_1.exec(line)?.index;
+
+    const name = typeof splitIndex === 'number'
+      ? line.slice(0, splitIndex).trim()
+      : line.trim();
+
+    let hint: string | undefined;
+    if (typeof splitIndex === 'number' && line[splitIndex] === '(') {
+      let depth = 1;
+      let j = splitIndex + 1;
+
+      while (depth > 0 && j < line.length) {
+        if (line[j] === '(') depth++;
+        if (line[j] === ')') depth--;
+        j++;
+      }
+
+      hint = line.slice(splitIndex + 1, j - 1);
+      splitIndex = j;
+    }
+
+    const remainingPart = line.slice(splitIndex);
+    const parts = remainingPart
+      .trim()
       .split(/([!=])/)
       .map(part => part.trim());
 
-    const [name, ...extra] = parts;
     if (!name) {
       return { ok: false, line: i + 1, key: 'errors.emptyName' };
     }
 
-    parsedLines.push({ line: i + 1, name, extra });
+    parsedLines.push({ 
+      line: i + 1, 
+      name: name.trim(), 
+      hint: hint?.trim(),
+      extra: parts.filter(Boolean)
+    });
   }
 
   // First pass: create participants and build name-to-id mapping
-  for (const {line, name} of parsedLines) {
+  for (const {line, name, hint} of parsedLines) {
     if (nameToId[name]) {
       return { 
         ok: false, 
@@ -67,9 +102,9 @@ export function parseParticipantsText(input: string): ParseResult {
       };
     }
 
-    const id = crypto.randomUUID();
+    const id = existingParticipants?.[name]?.id ?? crypto.randomUUID();
     nameToId[name] = id;
-    result[id] = { id, name, rules: [] };
+    result[id] = { id, name, hint, rules: [] };
   }
 
   // Second pass: process rules

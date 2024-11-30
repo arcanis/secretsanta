@@ -21,7 +21,6 @@ export function ParticipantsList({
 }: ParticipantsListProps) {
   const { t } = useTranslation();
   const [nextParticipantId, setNextParticipantId] = useState(() => crypto.randomUUID());
-  const [isTextView, setIsTextView] = useState(false);
 
   const updateParticipant = (id: string, name: string) => {
     if (id === nextParticipantId) {
@@ -53,8 +52,12 @@ export function ParticipantsList({
   }];
 
   return (
-    <div className="space-y-2">
-      <div className="space-y-2 pr-2">
+    <div className="space-y-4">
+      <p className="mt-1 text-xs text-gray-500">
+        {t('participants.generationWarning')}
+      </p>
+
+      <div className="space-y-2">
         {participantsList.map((participant, index) => (
           <ParticipantRow
             key={participant.id}

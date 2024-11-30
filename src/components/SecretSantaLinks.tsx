@@ -19,17 +19,20 @@ export function SecretSantaLinks({ assignments, instructions, participants, onGe
   const currentHash = generateGenerationHash(participants);
   const hasChanged = currentHash !== assignments.hash;
 
-  const adjustedPairings = assignments.pairings.map(({giver, receiver}): [string, string] => [
+  const adjustedPairings = assignments.pairings.map(({giver, receiver}): [string, string, string | undefined] => [
     participants[giver.id]?.name ?? giver.name,
     participants[receiver.id]?.name ?? receiver.name,
+    participants[receiver.id]?.hint,
   ]);
+
+  console.log(assignments.pairings, participants)
 
   adjustedPairings.sort((a, b) => {
     return a[0].localeCompare(b[0]);
   });
 
   const handleExportCSV = () => {
-    const csvContent = generateCSV(adjustedPairings);
+    const csvContent = generateCSV(adjustedPairings.map(([giver, receiver]) => [giver, receiver]));
     const blob = new Blob([csvContent], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
 
@@ -69,13 +72,13 @@ export function SecretSantaLinks({ assignments, instructions, participants, onGe
         </button>
       </div>
       <div className="grid grid-cols-[minmax(100px,auto)_1fr] gap-3">
-        {adjustedPairings.map(([giver, receiver]) => (
+        {adjustedPairings.map(([giver, receiver, hint]) => (
           <React.Fragment key={giver}>
             <span className="font-medium self-center">
               {giver}:
             </span>
             <CopyButton
-              textToCopy={() => generateAssignmentLink(giver, receiver, instructions)}
+              textToCopy={() => generateAssignmentLink(giver, receiver, hint, instructions)}
               className="p-2 bg-blue-500 text-white rounded hover:bg-blue-600 flex items-center justify-center gap-2"
             >
               {t('links.copySecretLink')}

@@ -22,6 +22,7 @@ export function RulesModal({
   const { t } = useTranslation();
   const participant = participants[participantId];
   const [localRules, setLocalRules] = useState<Rule[]>(participant.rules);
+  const [localHint, setLocalHint] = useState<string>(participant.hint || '');
 
   // Add escape key handler
   useEffect(() => {
@@ -56,6 +57,7 @@ export function RulesModal({
   const handleSave = () => {
     onChangeParticipants(produce(participants, draft => {
       draft[participantId].rules = localRules;
+      draft[participantId].hint = localHint || undefined;
     }));
     onClose();
   };
@@ -72,6 +74,19 @@ export function RulesModal({
         <h2 className="text-xl font-bold mb-4">
           {t('rules.title', { name: participant.name })}
         </h2>
+        
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            {t('rules.hintLabel')}
+          </label>
+          <input
+            type="text"
+            value={localHint}
+            onChange={(e) => setLocalHint(e.target.value)}
+            placeholder={t('rules.hintPlaceholder')}
+            className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          />
+        </div>
         
         <div className="space-y-4 mb-6">
           {localRules.map((rule, index) => (

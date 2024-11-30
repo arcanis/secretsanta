@@ -14,7 +14,7 @@ export function checkRules(rules: Rule[]): string | null {
 }
 
 export function generateGenerationHash(participants: Record<string, Participant>): string {
-  return JSON.stringify(Object.values(participants).map(p => ({rules: p.rules})));
+  return JSON.stringify(Object.values(participants).map(p => ({rules: p.rules, hint: p.hint})));
 }
 
 export type GeneratedPairs = {

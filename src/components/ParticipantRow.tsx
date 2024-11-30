@@ -38,7 +38,7 @@ export function ParticipantRow({
           <button
             onClick={onOpenRules}
             className={`px-2 sm:px-3 py-2 rounded hover:opacity-80 flex-shrink-0 ${
-              participant.rules.length > 0 
+              participant.rules.length > 0 || participant.hint
                 ? 'bg-yellow-500 text-white' 
                 : 'bg-gray-200 text-gray-600'
             }`}

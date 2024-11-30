@@ -36,6 +36,7 @@ export const fr: Translations = {
   },
   participants: {
     title: "Participants",
+    generationWarning: "Important: Toute modification de la liste des participants ou de leurs paramètres nécessitera la création de nouvelles associations. Les liens existants ne seront pas modifiés.",
     addPerson: "Ajouter une Personne",
     generatePairs: "Générer les Associations",
     enterName: "Entrez le nom du participant",
@@ -55,7 +56,9 @@ export const fr: Translations = {
     addMustRule: "Forcer une association",
     addMustNotRule: "Exclure une association",
     cancel: "Annuler",
-    saveRules: "Enregistrer les Règles"
+    saveRules: "Enregistrer les Règles",
+    hintLabel: 'Suggestions pour le cadeau',
+    hintPlaceholder: 'Entrez une indication sur le type de cadeau adapté à ce participant (optionnel)',
   },
   links: {
     title: "Liens à Partager",

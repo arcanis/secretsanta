@@ -1,5 +1,5 @@
 import { Participant } from '../types';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { parseParticipantsText, ParseError, formatParticipantText } from '../utils/parseParticipants';
 import { ArrowsClockwise } from '@phosphor-icons/react';
 import { useTranslation } from 'react-i18next';
@@ -19,7 +19,7 @@ export function ParticipantsTextView({ participants, onChangeParticipants, onGen
   const handleChange = (newText: string) => {
     setText(newText);
     
-    const result = parseParticipantsText(newText);
+    const result = parseParticipantsText(newText, participants);
     if (result.ok) {
       setError(null);
       onChangeParticipants(result.participants);

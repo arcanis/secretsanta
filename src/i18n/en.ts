@@ -34,6 +34,7 @@ export const en = {
   },
   participants: {
     title: "Participants",
+    generationWarning: "Important: Any change made to the participant list or settings will require creating new pairings. Existing links won't be retroactively modified.", 
     addPerson: "Add Person",
     generatePairs: "Generate Pairings",
     enterName: "Enter participant name",
@@ -53,7 +54,9 @@ export const en = {
     addMustRule: "Force a Pairing",
     addMustNotRule: "Prevent a Pairing",
     cancel: "Cancel",
-    saveRules: "Save Rules"
+    saveRules: "Save Rules",
+    hintLabel: 'Gift Hint',
+    hintPlaceholder: 'Enter a hint about gift preferences (optional)',
   },
   links: {
     title: "Links to Share",
