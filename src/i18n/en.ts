@@ -17,6 +17,7 @@ export const en = {
   },
   home: {
     vanity: "Project started in winter 2015 by Maël",
+    sponsor: "Sponsor me on GitHub",
     title: "Secret Santa Planner",
     explanation: [
       "Welcome! This tool will help you arrange your holiday gift exchanges. Simply list all participants, and we'll randomly assign pairings according to the rules you set.",

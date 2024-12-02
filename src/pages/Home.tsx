@@ -12,7 +12,7 @@ import { PostCard } from '../components/PostCard';
 import { Trans, useTranslation } from 'react-i18next';
 import { MenuItem } from '../components/SideMenu';
 import { PageTransition } from '../components/PageTransition';
-import { Code, Heart, Rows } from '@phosphor-icons/react';
+import { Code, Heart, Rows, Star } from '@phosphor-icons/react';
 import { Settings } from '../components/Settings';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { Layout } from '../components/Layout';
@@ -104,9 +104,14 @@ export function Home() {
   };
 
   const menuItems = [
-    <MenuItem key={`vanity`} to="https://bsky.app/profile/mael.dev" icon={<Heart className={`text-red-700`} weight={`fill`}/>}>
-      {t(`home.vanity`)}
-    </MenuItem>
+    <div className="flex flex-col space-y-2 lg:flex-row lg:space-y-0 lg:space-x-2">
+      <MenuItem key={`vanity`} to="https://bsky.app/profile/mael.dev" icon={<Star className={`text-orange-500`} weight={`fill`}/>}>
+        {t(`home.vanity`)}
+      </MenuItem>
+      <MenuItem key={`sponsor`} to="https://github.com/sponsors/arcanis?frequency=one-time&sponsor=arcanis" icon={<Heart className={`text-red-700`} weight={`fill`}/>}>
+        {t(`home.sponsor`)}
+      </MenuItem>
+    </div>,
   ];
 
   const toggleViewButton = (
