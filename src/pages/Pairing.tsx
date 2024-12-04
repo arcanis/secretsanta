@@ -103,14 +103,14 @@ export function Pairing() {
               <div className="text-8xl font-bold text-center p-6 font-dancing-script">
                 {assignment[1].name}
               </div>
-              {instructions && (
+              {(instructions || assignment[1].hint) && (
                 <div className="mt-6 flex p-4 bg-gray-50 rounded-lg leading-6 text-gray-600 whitespace-pre-wrap">
                   <div className="mr-4">
                     <Info size={24}/>
                   </div>
                   <div className="space-y-2">
-                    {assignment[1].hint ? <p>{assignment[1].hint}</p> : null}
-                    <p>{instructions}</p>
+                    {assignment[1].hint && <p>{assignment[1].hint}</p>}
+                    {instructions && <p>{instructions}</p>}
                   </div>
                 </div>
               )}
@@ -120,4 +120,4 @@ export function Pairing() {
       </div>
     </Layout>
   );
-} 
+}
