@@ -22,9 +22,9 @@ export async function generateAssignmentLink(giver: string, receiver: string, re
   return `${baseUrl}/pairing?${params.toString()}`;
 }
 
-export function generateCSV(assignments: [string, string][]) {
+export function generateCSV(assignments: [string, string, string][]) {
   const csvContent = assignments
-    .map(([giver, receiver]) => `${giver}\t${receiver}`)
+    .map(([giver, receiver, secretUrl]) => `${giver}\t${receiver}\t${secretUrl}`)
     .join('\n');
-  return `Giver\tReceiver\n${csvContent}`;
+  return `Giver\tReceiver\tSecret Link\n${csvContent}`;
 } 

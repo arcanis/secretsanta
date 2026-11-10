@@ -29,8 +29,18 @@ export function SecretSantaLinks({ assignments, instructions, participants, onGe
     return a[0].localeCompare(b[0]);
   });
 
-  const handleExportCSV = () => {
-    const csvContent = generateCSV(adjustedPairings.map(([giver, receiver]) => [giver, receiver]));
+  const handleExportCSV = async () => {
+    // 1. Map to an array of promises
+    const pairingsPromises = adjustedPairings.map(async ([giver, receiver, hint]): Promise<[string, string, string]> => { 
+      const secretUrl = await generateAssignmentLink(giver, receiver, hint, instructions);
+      return [giver, receiver, secretUrl];
+    });
+
+    // 2. Wait for all promises to resolve
+    const resolvedPairings = await Promise.all(pairingsPromises);
+
+    // 3. Generate and download the CSV as before
+    const csvContent = generateCSV(resolvedPairings);
     const blob = new Blob([csvContent], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
 
